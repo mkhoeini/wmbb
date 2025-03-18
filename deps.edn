@@ -1,7 +1,10 @@
 {:paths ["src"]
  :deps {org.clojure/clojure {:mvn/version "1.12.0"}
         cheshire/cheshire {:mvn/version "5.13.0"}
-        org.clojure/core.async {:mvn/version "1.8.718-beta2"}}
+        org.clojure/core.async {:mvn/version "1.8.718-beta2"}
+        metosin/malli {:mvn/version "0.17.0"}
+        com.github.piotr-yuxuan/malli-cli {:mvn/version "2.1.2"}
+        com.github.clj-easy/graal-build-time {:mvn/version "1.0.5"}}
  :aliases
  {:build {:deps {io.github.clojure/tools.build {:git/tag "v0.10.7" :git/sha "573711e"}}
           :ns-default build}}}

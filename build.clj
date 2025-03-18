@@ -3,8 +3,7 @@
 
 (def class-dir "target/classes")
 (def basis (delay (b/create-basis {:project "deps.edn"})))
-(def basis-for-native-compile (delay (b/create-basis {:project "deps.edn"
-                                                      :extra '{com.github.clj-easy/graal-build-time {:mvn/version "1.0.5"}}})))
+(def basis-for-native-compile (delay (b/create-basis {:project "deps.edn"})))
 (def jar-file "target/echo.jar")
 
 (defn clean [_]
