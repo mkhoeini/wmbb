@@ -1,21 +1,18 @@
 (ns wmbb.system
   (:require
-   [integrant.core :as ig]))
+   [integrant.core :as ig]
+   [wmbb.server.socket :as server-socket]
+   [wmbb.server.data :as server-data]))
+
 
 (def config
-  {} #_{:adapter/jetty {:port (ig/profile {:dev 8080 :prod 80}), :handler (ig/ref :handler/greet)}
-        :handler/greet {:name "Alice"}})
+  {::server-socket/incoming-events-channel {}
+   ::server-socket/server {:port 5556 :events-chan (ig/ref ::server-socket/incoming-events-channel)}
 
-(defmethod ig/init-key :adapter/jetty [_ {:keys [handler] :as opts}]
-  nil #_(jetty/run-jetty handler (-> opts (dissoc :handler) (assoc :join? false))))
+   ::server-data/displays {}
+   ::server-data/spaces {}
+   ::server-data/windows {}})
 
-(defmethod ig/init-key :handler/greet [_ {:keys [name]}]
-  (fn [_] nil #_(resp/response (str "Hello " name))))
-
-(defmethod ig/halt-key! :adapter/jetty [_ server]
-  (.stop server))
-
-(ig/load-namespaces config)
 
 (defn make-system []
   (-> config

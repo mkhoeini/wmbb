@@ -5,7 +5,7 @@
     :refer
     [yabai-window-focus yabai-window-move yabai-window-resize]]))
 
-(defn get-current-manageable-windows []
+(defn get-current-manageable-windows [spaces windows]
   (let [is-manageable? (every-pred :has-ax-reference
                                    #(= "AXWindow" (:role %))
                                    (complement :is-minimized)
@@ -17,7 +17,7 @@
                                    (complement :is-grabbed)
                                    (complement :is-hidden)
                                    :is-visible)]
-    (->> (get-active-space-windows)
+    (->> (get-active-space-windows spaces windows)
          (filter is-manageable?)
          (sort-by (juxt #(-> % :frame :x) #(-> % :frame :y))))))
 
@@ -26,25 +26,29 @@
 (def bottom-margin 10)
 (def h-w-ratio 1.414214)
 
-(defn get-ideal-size []
-  (let [height (-> (get-active-display) :frame :h)
+
+(defn get-ideal-size [displays]
+  (let [height (-> (get-active-display displays) :frame :h)
         available-height (- height top-margin bottom-margin)]
     {:w (/ available-height h-w-ratio)
      :h available-height}))
 
-(defn resize-current-windows []
-  (let [{:keys [w h]} (get-ideal-size)]
-    (doseq [win (get-current-manageable-windows)]
+
+(defn resize-current-windows [displays spaces windows]
+  (let [{:keys [w h]} (get-ideal-size displays)]
+    (doseq [win (get-current-manageable-windows spaces windows)]
       (yabai-window-resize (:id win) w h))))
+
 
 (def around-margin 5)
 
-(defn get-x-distribution []
-  (let [width (-> (get-active-display) :frame :w)
+
+(defn get-x-distribution [displays spaces windows]
+  (let [width (-> (get-active-display displays) :frame :w)
         available-width (- width (* 2 around-margin))
-        ideal-width (:w (get-ideal-size))
+        ideal-width (:w (get-ideal-size displays))
         workable-width (/ (- available-width ideal-width) 2)
-        windows (get-current-manageable-windows)
+        windows (get-current-manageable-windows spaces windows)
         total-windows (count windows)
         left-windows (count (take-while #(not (:has-focus %)) windows))
         right-windows (- total-windows left-windows 1)
@@ -55,20 +59,18 @@
                    (->> (range right-windows) (map #(* right-pace %))))]
     (map vector windows xs)))
 
-(defn move-current-windows []
-  (doseq [[win x] (get-x-distribution)]
+
+(defn move-current-windows [displays spaces windows]
+  (doseq [[win x] (get-x-distribution displays spaces windows)]
     (yabai-window-move (:id win) x top-margin)))
 
-(defn resize-and-move []
-  (let [windows (get-current-manageable-windows)]
-    (resize-current-windows)
-    (move-current-windows)
+
+(defn resize-and-move [displays spaces windows]
+  (let [windows (get-current-manageable-windows spaces windows)]
+    (resize-current-windows displays spaces windows)
+    (move-current-windows displays spaces windows)
     (doseq [w (take-while #(not (:has-focus %)) (reverse windows))]
       (yabai-window-focus (:id w)))
     (doseq [w (take-while #(not (:has-focus %)) windows)]
       (yabai-window-focus (:id w)))
     (yabai-window-focus (:id (some #(when (:has-focus %) %) windows)))))
-
-(comment
-  (resize-and-move)
-  END)

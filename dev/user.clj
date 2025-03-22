@@ -15,12 +15,12 @@
 (def system nil)
 
 (defn start-system! []
-  (alter-var-root #'system (make-system)))
+  (alter-var-root #'system (constantly (make-system))))
 
 (defn stop-system! []
   (when system
     (ig/halt! system)
-    (alter-var-root #'system nil)))
+    (alter-var-root #'system (constantly nil))))
 
 (defn start-morse! []
   (morse/launch-in-proc))

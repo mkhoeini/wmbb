@@ -1,7 +1,9 @@
 (ns wmbb.cli.core
- (:gen-class)
- (:require [piotr-yuxuan.malli-cli :as malli-cli]
-           [malli.core :as m]))
+  (:gen-class)
+  (:require
+   [malli.core :as m]
+   [piotr-yuxuan.malli-cli :as malli-cli]
+   [wmbb.system :refer [make-system]]))
 
 (def Config
   (m/schema
@@ -28,9 +30,13 @@
           (println (get-help))
 
           (:window-manager config)
-          (print "window manager")
+          (let [system (make-system)]
+            ; wait for the socket server to finish
+            @(-> system :wmbb.server.socket/server :loop))
 
           :else
           (println config (get-help)))))
 
-(-main "--window-manager")
+(comment
+  (-main "--window-manager")
+  #_END)
