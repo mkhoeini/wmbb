@@ -1,4 +1,4 @@
-(ns wmbb.cli.core
+(ns wmbb.cli-main
   (:gen-class)
   (:require
    [malli.core :as m]

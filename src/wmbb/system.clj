@@ -1,9 +1,8 @@
 (ns wmbb.system
   (:require
    [integrant.core :as ig]
-   [wmbb.server.socket :as server-socket]
-   [wmbb.server.data :as server-data]))
-
+   [wmbb.data.data :as server-data]
+   [wmbb.socket :as server-socket]))
 
 (def config
   {::server-socket/incoming-events-channel {}

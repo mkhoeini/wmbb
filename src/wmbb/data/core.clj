@@ -1,6 +1,6 @@
-(ns wmbb.server.core
+(ns wmbb.data.core
   (:require
-   [wmbb.server.data :refer [get-active-display get-active-space-windows]]
+   [wmbb.data.data :refer [get-active-display get-active-space-windows]]
    [wmbb.yabai
     :refer
     [yabai-window-focus yabai-window-move yabai-window-resize]]))

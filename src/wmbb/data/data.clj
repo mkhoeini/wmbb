@@ -1,4 +1,4 @@
-(ns wmbb.server.data
+(ns wmbb.data.data
   (:require
    [clojure.core.async
     :as async
