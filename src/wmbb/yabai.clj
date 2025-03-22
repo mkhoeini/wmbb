@@ -89,3 +89,6 @@
 
 (defn yabai-window-move [window-id width height]
   (yabai :window (str window-id) "--move" (str "abs:" width ":" height)))
+
+(defn yabai-window-focus [window-id]
+  (yabai :window "--focus" (str window-id)))
