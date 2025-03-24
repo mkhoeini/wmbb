@@ -1,22 +1,18 @@
 (ns wmbb.socket
   (:require
    [clojure.core.server :as s]
-   [integrant.core :as ig]))
+   [mount.core :refer [defstate]]
+   [wmbb.events :refer [add-event]]))
 
 
-(defn start-server! [port events-chan]
-  (s/start-server {:name ::socket-server :port port :accept s/io-prepl :server-daemon false})
-  #(s/stop-server ::socket-server))
-
-(comment
-  (def incoming-events (chan))
-  (def stop (start-server! 5556 incoming-events))
-  (stop)
-  END)
+; Make sure add-event exists in user ns for easy usage in repl
+(let [user-ns (create-ns 'user)]
+  (intern user-ns 'ev-> add-event))
 
 
-(defmethod ig/init-key ::server [_ {:keys [port events-chan]}]
-  (start-server! port events-chan))
+(def port 5556)
 
-(defmethod ig/halt-key! ::server [_ server-stop-fn]
-  (server-stop-fn))
+(defstate socket-server
+  "prepl socket server"
+  :start (s/start-server {:name ::socket-server :port port :accept `s/io-prepl :server-daemon true})
+  :stop (s/stop-server ::socket-server))

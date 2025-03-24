@@ -3,7 +3,7 @@
   (:require
    [malli.core :as m]
    [piotr-yuxuan.malli-cli :as malli-cli]
-   [wmbb.system :refer [make-system]]))
+   [wmbb.socket]))
 
 (def Config
   (m/schema
@@ -30,9 +30,7 @@
           (println (get-help))
 
           (:window-manager config)
-          (let [system (make-system)]
-            ; wait for the socket server to finish
-            @(-> system :wmbb.server.socket/server :loop))
+          @(promise)
 
           :else
           (println config (get-help)))))

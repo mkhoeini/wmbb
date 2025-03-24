@@ -5,7 +5,8 @@
         cheshire/cheshire {:mvn/version "5.13.0"}
         metosin/malli {:mvn/version "0.17.0"}
         com.github.piotr-yuxuan/malli-cli {:mvn/version "2.1.2"}
-        integrant/integrant {:mvn/version "0.13.1"}}
+        datascript/datascript {:mvn/version "1.7.4"}
+        mount/mount {:mvn/version "0.1.21"}}
 
  :aliases {:build {:deps {io.github.clojure/tools.build {:git/tag "v0.10.7" :git/sha "573711e"}}
                    :ns-default build}
