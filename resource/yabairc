@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+yabai -m config debug_output on
+
+# Global Configs
+yabai -m config focus_follows_mouse autoraise
+yabai -m config mouse_follows_focus on
+yabai -m config window_origin_display cursor
+
+# signal fn
+
+function y() {
+  local event="$1"
+  local arg="$2"
+  yabai -m signal --add event="$event" action="echo -n \"(ev-> $arg)\" | nc localhost 5556"
+}
+
+# window signals
+y window_created "{:event :yabai.window/created, :yabai.window/id \$YABAI_WINDOW_ID}"
+y window_destroyed "{:event :yabai.window/destroyed, :yabai.window/id \$YABAI_WINDOW_ID}"
+y window_focused "{:event :yabai.window/focused, :yabai.window/id \$YABAI_WINDOW_ID}"
+y window_moved "{:event :yabai.window/moved, :yabai.window/id \$YABAI_WINDOW_ID}"
+y window_resized "{:event :yabai.window/resized, :yabai.window/id \$YABAI_WINDOW_ID}"
+y window_minimized "{:event :yabai.window/minimized, :yabai.window/id \$YABAI_WINDOW_ID}"
+y window_deminimized "{:event :yabai.window/deminimized, :yabai.window/id \$YABAI_WINDOW_ID}"
+y window_title_changed "{:event :yabai.window/title_changed, :yabai.window/id \$YABAI_WINDOW_ID}"
+
+# space signals
+y space_created "{:event :yabai.space/created, :yabai.space/id \$YABAI_SPACE_ID}"
+y space_destroyed "{:event :yabai.space/destroyed, :yabai.space/id \$YABAI_SPACE_ID}"
+y space_changed "{:event :yabai.space/changed, :yabai.space/id \$YABAI_SPACE_ID}"
+
+# display removed
+y display_added "{:event :yabai.display/added, :yabai.display/id \$YABAI_DISPLAY_ID}"
+y display_removed "{:event :yabai.display/removed, :yabai.display/id \$YABAI_DISPLAY_ID}"
+y display_moved "{:event :yabai.display/moved, :yabai.display/id \$YABAI_DISPLAY_ID}"
+y display_resized "{:event :yabai.display/resized, :yabai.display/id \$YABAI_DISPLAY_ID}"
+y display_changed "{:event :yabai.display/changed, :yabai.display/id \$YABAI_DISPLAY_ID}"

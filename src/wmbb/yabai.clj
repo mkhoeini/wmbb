@@ -1,7 +1,27 @@
 (ns wmbb.yabai
   (:require
    [cheshire.core :refer [parse-string]]
-   [clojure.java.process :refer [exec]]))
+   [clojure.java.io :as jio]
+   [clojure.java.process :as jproc]
+   [mount.core :refer [defstate]])
+  (:import
+   (java.io File)))
+
+
+
+(defonce ^:private config-file
+  (let [temp (File/createTempFile "yabairc" "")]
+    (jio/copy (jio/file (jio/resource "yabairc")) temp)
+    (println "yabai config is written into" (.getAbsolutePath temp))
+    temp))
+
+(defstate ^:private yabai-output :start (File/createTempFile "yabai" "out"))
+
+(defstate yabai-process
+  :start (let [p (jproc/start {:err :stdout :out (jproc/to-file yabai-output)} "yabai" "--config" (.getAbsolutePath config-file))]
+           (println "Started yabai. Output is written into" (.getAbsolutePath yabai-output))
+           p)
+  :stop (.destroy yabai-process))
 
 
 (def display-schema
@@ -65,8 +85,9 @@
      [:scratchpad :string]
      [:can-resize :boolean]])
 
+
 (defn yabai [mod & rest]
-  (apply exec {:err :stdout} "yabai" "-m" (name mod) rest))
+  (apply jproc/exec {:err :stdout} "yabai" "-m" (name mod) rest))
 
 (defn query
   {:malli/schema [:->
