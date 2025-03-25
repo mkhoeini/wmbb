@@ -68,7 +68,7 @@
 (defn yabai [mod & rest]
   (apply exec {:err :stdout} "yabai" "-m" (name mod) rest))
 
-(defn yabai-query
+(defn query
   {:malli/schema [:->
                   [:enum :displays :spaces :windows]
                   [:or [:vector display-schema] [:vector space-schema] [:vector window-schema]]]}
@@ -79,16 +79,16 @@
     (into [] res)))
 
 (comment
-  (yabai-query :displays)
-  (yabai-query :spaces)
-  (yabai-query :windows)
+  (query :displays)
+  (query :spaces)
+  (query :windows)
   END)
 
-(defn yabai-window-resize [window-id width height]
+(defn window-resize [window-id width height]
   (yabai :window (str window-id) "--resize" (str "abs:" width ":" height)))
 
-(defn yabai-window-move [window-id width height]
+(defn window-move [window-id width height]
   (yabai :window (str window-id) "--move" (str "abs:" width ":" height)))
 
-(defn yabai-window-focus [window-id]
+(defn window-focus [window-id]
   (yabai :window "--focus" (str window-id)))

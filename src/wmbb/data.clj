@@ -52,8 +52,10 @@
 
 (comment
   (get-active-space-windows)
-  END)
-(defn display->tx [{:keys [id uuid index label frame spaces has-focus]}]
+  #_END)
+
+
+(defn- display->tx [{:keys [id uuid index label frame spaces has-focus]}]
   #:wmbb.display{:id id
                  :uuid uuid
                  :index index
@@ -66,7 +68,7 @@
                  :h (:h frame)})
 
 
-(defn space->tx [{:keys [windows index is-native-fullscreen type label id is-visible has-focus display last-window uuid first-window]}]
+(defn- space->tx [{:keys [windows index is-native-fullscreen type label id is-visible has-focus display last-window uuid first-window]}]
   #:wmbb.space{:id id
                :label label
                :type type
@@ -81,7 +83,7 @@
                :first-window first-window})
 
 
-(defn window->tx [window]
+(defn- window->tx [window]
   #:wmbb.window{:role (:role window)
                 :has-ax-reference (:has-ax-reference window)
                 :has-shadow (:has-shadow window)
@@ -120,7 +122,7 @@
                 :can-resize (:can-resize window)})
 
 
-(defn get-update-displays-transations [displays]
+(defn- get-update-displays-transations [displays]
   (let [old-ids (get-display-ids)
         new-ids (set (map :id displays))
         ids-to-del (filter #(not (new-ids %)) old-ids)
@@ -129,7 +131,7 @@
     (concat del-tx add-tx)))
 
 
-(defn get-update-spaces-transations [spaces]
+(defn- get-update-spaces-transations [spaces]
   (let [old-ids (get-space-ids)
         new-ids (set (map :id spaces))
         ids-to-del (filter #(not (new-ids %)) old-ids)
@@ -138,7 +140,7 @@
     (concat del-tx add-tx)))
 
 
-(defn get-update-windows-transations [windows]
+(defn- get-update-windows-transations [windows]
   (let [old-ids (get-window-ids)
         new-ids (set (map :id windows))
         ids-to-del (filter #(not (new-ids %)) old-ids)
