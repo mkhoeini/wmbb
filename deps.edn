@@ -6,12 +6,11 @@
         metosin/malli {:mvn/version "0.17.0"}
         com.github.piotr-yuxuan/malli-cli {:mvn/version "2.1.2"}
         datascript/datascript {:mvn/version "1.7.4"}
-        mount/mount {:mvn/version "0.1.21"}}
+        mount/mount {:mvn/version "0.1.21"}
+        io.github.nubank/morse {:git/tag "v2023.10.06.02" :git/sha "88b5ff7"}
+        org.clojure/tools.namespace {:mvn/version "1.5.0"}}
 
  :aliases {:build {:deps {io.github.clojure/tools.build {:git/tag "v0.10.7" :git/sha "573711e"}}
                    :ns-default build}
 
-           :native-build {:extra-deps {com.github.clj-easy/graal-build-time {:mvn/version "1.0.5"}}}
-
-           :dev {:extra-paths ["dev"]
-                 :extra-deps {io.github.nubank/morse {:git/tag "v2023.10.06.02" :git/sha "88b5ff7"}}}}}
+           :native-build {:extra-deps {com.github.clj-easy/graal-build-time {:mvn/version "1.0.5"}}}}}

@@ -3,7 +3,9 @@
   (:require
    [malli.core :as m]
    [piotr-yuxuan.malli-cli :as malli-cli]
-   [wmbb.socket]))
+   [wmbb.system :refer [start-system!]]))
+
+
 
 (def Config
   (m/schema
@@ -16,8 +18,10 @@
                  :short-option "-h"
                  :arg-number 0}]]]))
 
+
 (defn get-help []
   (malli-cli/summary Config))
+
 
 (defn -main [& args]
   (let [config (m/decode Config args malli-cli/cli-transformer)]
@@ -30,7 +34,9 @@
           (println (get-help))
 
           (:window-manager config)
-          @(promise)
+          (do
+           (start-system!)
+           @(promise))
 
           :else
           (println config (get-help)))))

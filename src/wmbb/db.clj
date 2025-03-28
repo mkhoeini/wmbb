@@ -1,6 +1,7 @@
 (ns wmbb.db
   (:require
-    [datascript.core :as d]))
+   [datascript.core :as d]
+   [mount.core :refer [defstate]]))
 
 
 (def schema {:wmbb.display/id {:db/unique :db.unique/identity}
@@ -13,7 +14,7 @@
              :wmbb.manager.display/last-display {:db/valueType :db.type/ref}})
 
 
-(def db (d/create-conn schema))
+(defstate db :start (d/create-conn schema))
 
 
 (defn transact [tx] (d/transact! db tx))

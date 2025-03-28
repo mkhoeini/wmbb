@@ -1,13 +1,7 @@
 (ns wmbb.socket
   (:require
    [clojure.core.server :as s]
-   [mount.core :refer [defstate]]
-   [wmbb.events :refer [add-event]]))
-
-
-; Make sure add-event exists in user ns for easy usage in repl
-(let [user-ns (create-ns 'user)]
-  (intern user-ns 'ev-> add-event))
+   [mount.core :refer [defstate]]))
 
 
 (def port 5556)
