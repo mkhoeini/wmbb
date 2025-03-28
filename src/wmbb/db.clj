@@ -8,7 +8,9 @@
              :wmbb.window/id {:db/unique :db.unique/identity}
 
              :wmbb.display/spaces {:db/cardinality :db.cardinality/many}
-             :wmbb.space/windows {:db/cardinality :db.cardinality/many}})
+             :wmbb.space/windows {:db/cardinality :db.cardinality/many}
+
+             :wmbb.manager.display/last-display {:db/valueType :db.type/ref}})
 
 
 (def db (d/create-conn schema))

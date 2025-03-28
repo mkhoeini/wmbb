@@ -122,35 +122,64 @@
                 :can-resize (:can-resize window)})
 
 
-(defn- get-update-displays-transations [displays]
-  (let [old-ids (get-display-ids)
-        new-ids (set (map :id displays))
-        ids-to-del (filter #(not (new-ids %)) old-ids)
-        del-tx (map #(do [:db/retractEntity [:wmbb.display/id %]]) ids-to-del)
-        add-tx (map display->tx displays)]
-    (concat del-tx add-tx)))
+(defn- get-update-displays-transactions [inserted deleted updated]
+  (let [ins-tx (map display->tx inserted)
+        del-tx (map #(do [:db/retractEntity [:wmbb.display/id %]]) deleted)
+        upd-tx (map display->tx updated)]
+    (concat ins-tx del-tx upd-tx)))
 
 
-(defn- get-update-spaces-transations [spaces]
-  (let [old-ids (get-space-ids)
-        new-ids (set (map :id spaces))
-        ids-to-del (filter #(not (new-ids %)) old-ids)
-        del-tx (map #(do [:db/retractEntity [:wmbb.space/id %]]) ids-to-del)
-        add-tx (map space->tx spaces)]
-    (concat del-tx add-tx)))
+(defn- get-update-spaces-transactions [inserted deleted updated]
+  (let [ins-tx (map space->tx inserted)
+        del-tx (map #(do [:db/retractEntity [:wmbb.space/id %]]) deleted)
+        upd-tx (map space->tx updated)]
+    (concat ins-tx del-tx upd-tx)))
 
 
-(defn- get-update-windows-transations [windows]
-  (let [old-ids (get-window-ids)
-        new-ids (set (map :id windows))
-        ids-to-del (filter #(not (new-ids %)) old-ids)
-        del-tx (map #(do [:db/retractEntity [:wmbb.window/id %]]) ids-to-del)
-        add-tx (map window->tx windows)]
-    (concat del-tx add-tx)))
+(defn- get-update-windows-transactions [inserted deleted updated]
+  (let [ins-tx (map window->tx inserted)
+        del-tx (map #(do [:db/retractEntity [:wmbb.window/id %]]) deleted)
+        upd-tx (map window->tx updated)]
+    (concat ins-tx del-tx upd-tx)))
 
 
-(defn update-data [displays spaces windows]
-  (let [displays-tx (get-update-displays-transations displays)
-        spaces-tx (get-update-spaces-transations spaces)
-        windows-tx (get-update-windows-transations windows)]
+(defn update-data [displays-diff spaces-diff windows-diff]
+  (let [displays-tx (get-update-displays-transactions
+                     (:inserted displays-diff)
+                     (:deleted displays-diff)
+                     (:updated displays-diff))
+        spaces-tx (get-update-spaces-transactions
+                   (:inserted spaces-diff)
+                   (:deleted spaces-diff)
+                   (:updated spaces-diff))
+        windows-tx (get-update-windows-transactions
+                    (:inserted windows-diff)
+                    (:deleted windows-diff)
+                    (:updated windows-diff))]
     (db/transact (concat displays-tx spaces-tx windows-tx))))
+
+
+(defn get-displays-diff [displays]
+  (let [existing-ids (set (get-display-ids))
+        given-ids (set (map :id displays))]
+    {:deleted (filter #(not (given-ids %)) existing-ids)
+     :updated (filter #(existing-ids (:id %)) displays)
+     :inserted (filter #(not (existing-ids (:id %))) displays)}))
+
+
+(defn get-spaces-diff [spaces]
+  (let [existing-ids (set (get-space-ids))
+        given-ids (set (map :id spaces))]
+    {:deleted (filter #(not (given-ids %)) existing-ids)
+     :updated (filter #(existing-ids (:id %)) spaces)
+     :inserted (filter #(not (existing-ids (:id %))) spaces)}))
+
+
+(defn get-windows-diff [windows]
+  (let [existing-ids (set (get-window-ids))
+        given-ids (set (map :id windows))]
+    {:deleted (filter #(not (given-ids %)) existing-ids)
+     :updated (filter #(existing-ids (:id %)) windows)
+     :inserted (filter #(not (existing-ids (:id %))) windows)}))
+
+
