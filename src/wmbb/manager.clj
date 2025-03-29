@@ -4,35 +4,52 @@
 
 
 
-(defonce ^:private first-db @db/db)
-
-(comment
-  (reset! db/db first-db))
-
-(defn get-last-display []
-  (db/find1 '[_ :wmbb.manager.display/last-display ?e]))
+(defn insert-display
+  "No need to do anything"
+  [_])
 
 
-(defn insert-display [display]
-  (let [display (db/find1 ['?e :wmbb.display/id (:id display)])]
-    (if-let [last-display (get-last-display)]
-      (db/transact [{:db/id "display"
-                     :wmbb.manager.display/ref display
-                     :wmbb.manager.display/prev last-display}
-                    [:db/add last-display :wmbb.manager.display/next "display"]
-                    [:db/add "last" :wmbb.manager.display/last-display "display"]])
-      (db/transact [[:db/add "display" :wmbb.manager.display/ref display]
-                    [:db/add "last" :wmbb.manager.display/last-display "display"]]))))
+(defn delete-display
+  "No need to do anything"
+  [_])
 
 
-(defn delete-display [_])
-(defn update-display [_])
-(defn insert-space [_])
-(defn delete-space [_])
-(defn update-space [_])
-(defn insert-window [_])
-(defn delete-window [_])
-(defn update-window [_])
+(defn update-display
+  "No need to do anything"
+  [_])
+
+
+(defn insert-space
+  "No need to do anything"
+  [_])
+
+
+(defn delete-space
+  "No need to do anything"
+  [_])
+
+
+(defn update-space
+  "No need to do anything"
+  [_])
+
+
+(defn insert-window
+  "Add window to the linked list"
+  [win-id]
+  (let [db-window (db/find1 '[?e :wmbb.window/id win-id])]))
+
+
+(defn delete-window
+  "No need to do anything"
+  [_])
+
+
+(defn update-window
+  "No need to do anything"
+  [_])
+
+
 
 
 ;; (def window-is-manageable?

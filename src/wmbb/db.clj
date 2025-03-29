@@ -17,23 +17,28 @@
 (defstate db :start (d/create-conn schema))
 
 
-(defn transact [tx] (d/transact! db tx))
+(def last-transaction (atom nil))
+
+(defn transact [& tx]
+  (let [tx-data (d/transact! db tx)]
+    (reset! last-transaction tx-data)
+    tx-data))
 
 
-(defn find1 [where]
+(defn find1 [& where]
   (->> @db
-       (d/q `[:find ~'?e . :where ~where])
+       (d/q {:find '[?e .] :where where})
        (d/entity @db)))
 
-(defn find* [where]
+(defn find* [& where]
   (->> @db
-       (d/q `[:find [~'?e ...] :where ~@(if (list? where) where [where])])
+       (d/q {:find '[[?e ...]] :where where})
        (map #(d/entity @db %))))
 
 (comment
   (find1 '[?e :wmbb.display/id])
   (find* '[?e :wmbb.window/id])
-  (find* '([?e :wmbb.window/id]))
+  (find* '[?e :wmbb.window/id] '[?e :wmbb.window/app])
   #_end)
 
 

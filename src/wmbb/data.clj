@@ -46,9 +46,9 @@
 
 
 (defn get-active-space-windows []
-  (db/find* '([?s :wmbb.space/has-focus true]
-              [?s :wmbb.space/windows ?w]
-              [?e :wmbb.window/id ?w])))
+  (db/find* '[?s :wmbb.space/has-focus true]
+            '[?s :wmbb.space/windows ?w]
+            '[?e :wmbb.window/id ?w]))
 
 (comment
   (get-active-space-windows)
@@ -156,7 +156,7 @@
                     (:inserted windows-diff)
                     (:deleted windows-diff)
                     (:updated windows-diff))]
-    (db/transact (concat displays-tx spaces-tx windows-tx))))
+    (apply db/transact (concat displays-tx spaces-tx windows-tx))))
 
 
 (defn get-displays-diff [displays]
@@ -181,5 +181,3 @@
     {:deleted (filter #(not (given-ids %)) existing-ids)
      :updated (filter #(existing-ids (:id %)) windows)
      :inserted (filter #(not (existing-ids (:id %))) windows)}))
-
-
