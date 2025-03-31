@@ -4,25 +4,22 @@
 
 
 
-(defn get-display-ids []
-  (->> (db/get-displays)
-       (map :wmbb.display/id)))
+(defn get-displays []
+  (db/find* '[?e :wmbb.display/id]))
 
 
-(defn get-space-ids []
-  (->> (db/get-spaces)
-       (map :wmbb.space/id)))
+(defn get-spaces []
+  (db/find* '[?e :wmbb.space/id]))
 
 
-(defn get-window-ids []
-  (->> (db/get-windows)
-       (map :wmbb.window/id)))
+(defn get-windows []
+  (db/find* '[?e :wmbb.window/id]))
 
 
 (comment
-  (get-display-ids)
-  (get-space-ids)
-  (get-window-ids)
+  (get-displays)
+  (get-spaces)
+  (get-windows)
   #_END)
 
 
@@ -160,7 +157,8 @@
 
 
 (defn get-displays-diff [displays]
-  (let [existing-ids (set (get-display-ids))
+  (let [existing-displays (get-displays)
+        existing-ids (set (map :wmbb.display/id existing-displays))
         given-ids (set (map :id displays))]
     {:deleted (filter #(not (given-ids %)) existing-ids)
      :updated (filter #(existing-ids (:id %)) displays)
@@ -168,7 +166,8 @@
 
 
 (defn get-spaces-diff [spaces]
-  (let [existing-ids (set (get-space-ids))
+  (let [existing-spaces (get-spaces)
+        existing-ids (set (map :wmbb.space/id existing-spaces))
         given-ids (set (map :id spaces))]
     {:deleted (filter #(not (given-ids %)) existing-ids)
      :updated (filter #(existing-ids (:id %)) spaces)
@@ -176,7 +175,8 @@
 
 
 (defn get-windows-diff [windows]
-  (let [existing-ids (set (get-window-ids))
+  (let [existing-windows (get-windows)
+        existing-ids (set (map :wmbb.window/id existing-windows))
         given-ids (set (map :id windows))]
     {:deleted (filter #(not (given-ids %)) existing-ids)
      :updated (filter #(existing-ids (:id %)) windows)

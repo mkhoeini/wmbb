@@ -33,18 +33,3 @@
   (find* '[?e :wmbb.window/id] '[?e :wmbb.window/app])
   #_end)
 
-
-(defn get-displays []
-  (find* '[?e :wmbb.display/id]))
-
-(defn get-spaces []
-  (find* '[?e :wmbb.space/id]))
-
-(defn get-windows []
-  (find* '[?e :wmbb.window/id]))
-
-(comment
-  (get-displays)
-  (get-spaces)
-  (get-windows)
-  #_end)
