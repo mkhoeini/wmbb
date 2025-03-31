@@ -1,17 +1,9 @@
 (ns wmbb.db
   (:require
    [datascript.core :as d]
-   [mount.core :refer [defstate]]))
+   [mount.core :refer [defstate]]
+   [wmbb.schema :refer [schema]]))
 
-
-(def schema {:wmbb.display/id {:db/unique :db.unique/identity}
-             :wmbb.space/id {:db/unique :db.unique/identity}
-             :wmbb.window/id {:db/unique :db.unique/identity}
-
-             :wmbb.display/spaces {:db/cardinality :db.cardinality/many}
-             :wmbb.space/windows {:db/cardinality :db.cardinality/many}
-
-             :wmbb.manager.display/last-display {:db/valueType :db.type/ref}})
 
 
 (defstate db :start (d/create-conn schema))
