@@ -8,7 +8,8 @@
         datascript/datascript {:mvn/version "1.7.4"}
         mount/mount {:mvn/version "0.1.21"}
         io.github.nubank/morse {:git/tag "v2023.10.06.02" :git/sha "88b5ff7"}
-        org.clojure/tools.namespace {:mvn/version "1.5.0"}}
+        org.clojure/tools.namespace {:mvn/version "1.5.0"}
+        integrant/integrant {:mvn/version "0.13.1"}}
 
  :aliases {:build {:deps {io.github.clojure/tools.build {:git/tag "v0.10.7" :git/sha "573711e"}}
                    :ns-default build}
