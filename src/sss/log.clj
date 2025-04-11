@@ -22,7 +22,11 @@
   (let [loc (assoc (meta &form)
                    :file *file*
                    :form &form)]
-    `(log :debug ~loc ~msg ~extra)))
+    `(log :debug '~loc ~msg ~extra)))
+
+(comment
+  (debug "hi")
+  #_end)
 
 
 (defmacro info [msg & extra]

@@ -1,19 +1,28 @@
 (ns sss.system
   (:require
     [integrant.core :as ig]
-    [sss.event]))
-
+    [sss.event :as ev]
+    [sss.db :as db]))
 
 
 
 (def default-config
-  {:event-chan {:buf 1000}})
+  {::ev/event-chan {:buf 1000}
+   ::db/db {:schema {}
+            :seed []}})
+
+
+(defn- get-config [opts]
+  (let [merge-fn (fn [a b]
+                   (if (map? a)
+                     (merge a b)
+                     b))]
+    (merge-with merge-fn default-config opts)))
 
 
 (defn create-system [opts]
-  (let [config (merge-with #(if (map? %1) (merge %1 %2) %2) default-config opts)
-        system (ig/init config)]
-    system))
+  (ig/init (get-config opts)))
+
 
 (defn halt-system! [system]
   (ig/halt! system))
