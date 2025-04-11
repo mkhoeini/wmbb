@@ -4,11 +4,11 @@
    [malli.dev :as mdev]
    [malli.dev.pretty :as mpret]
    [mount.core :as mount]
-   [wmbb.events :as ev]
+   [wmbb.yabai :as yabai]
    [clojure.tools.namespace.repl :as tn]))
 
 ;; used by yabai signals to call us
-(def ev-> ev/add-event)
+(def ev> yabai/put-event)
 
 
 (defn start-malli! []

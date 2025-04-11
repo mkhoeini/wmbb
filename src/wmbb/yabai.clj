@@ -1,17 +1,28 @@
 (ns wmbb.yabai
   (:require
    [cheshire.core :refer [parse-string]]
-   [clojure.java.io :as jio]
+   [clojure.java.io :as io]
    [clojure.java.process :as jproc]
-   [mount.core :refer [defstate]])
+   [mount.core :refer [defstate]]
+   [clojure.core.async :as async])
   (:import
    (java.io File)))
 
 
 
+(defstate events
+  :start (async/chan 1000)
+  :stop (async/close! events))
+
+
+(defn put-event [ev]
+  (async/put! events ev))
+
+
 (defonce ^:private config-file
-  (let [temp (File/createTempFile "yabairc" "")]
-    (jio/copy (jio/file (jio/resource "yabairc")) temp)
+  (let [conf (io/file (io/resource "yabairc"))
+        temp (File/createTempFile "yabairc" "")]
+    (io/copy conf temp)
     (println "yabai config is written into" (.getAbsolutePath temp))
     temp))
 
@@ -19,97 +30,116 @@
 
 (defstate yabai-process
   :start (let [p (jproc/start {:err :stdout :out (jproc/to-file yabai-output)} "yabai" "--config" (.getAbsolutePath config-file))]
+           ;; Give yabai process a second to properly start
+           (Thread/sleep 1000)
            (println "Started yabai. Output is written into" (.getAbsolutePath yabai-output))
            p)
   :stop (.destroy yabai-process))
 
 
-(def display-schema
-    [:map
-     [:id :int]
-     [:uuid :string]
-     [:index :int]
-     [:label :string]
-     [:frame [:map [:x :double] [:y :double] [:w :double] [:h :double]]]
-     [:spaces [:vector :int]]
-     [:has-focus :boolean]])
-
-(def space-schema
-    [:map
-     [:windows [:vector :int]]
-     [:index :int]
-     [:is-native-fullscreen :boolean]
-     [:type :string]
-     [:label :string]
-     [:id :int]
-     [:is-visible :boolean]
-     [:has-focus :boolean]
-     [:display :int]
-     [:last-window :int]
-     [:uuid :string]
-     [:first-window :int]])
-
-(def window-schema
-    [:map
-     [:role :string]
-     [:has-ax-reference :boolean]
-     [:has-shadow :boolean]
-     [:space :int]
-     [:is-minimized :boolean]
-     [:frame [:map [:x :double] [:y :double] [:w :double] [:h :double]]]
-     [:is-native-fullscreen :boolean]
-     [:is-sticky :boolean]
-     [:has-parent-zoom :boolean]
-     [:stack-index :int]
-     [:title :string]
-     [:level :int]
-     [:sub-level :int]
-     [:can-move :boolean]
-     [:pid :int]
-     [:is-floating :boolean]
-     [:layer :string]
-     [:split-type :string]
-     [:subrole :string]
-     [:is-grabbed :boolean]
-     [:opacity :double]
-     [:id :int]
-     [:sub-layer :string]
-     [:is-hidden :boolean]
-     [:app :string]
-     [:is-visible :boolean]
-     [:has-focus :boolean]
-     [:display :int]
-     [:has-fullscreen-zoom :boolean]
-     [:root-window :boolean]
-     [:split-child :string]
-     [:scratchpad :string]
-     [:can-resize :boolean]])
-
-
 (defn yabai [mod & rest]
   (apply jproc/exec {:err :stdout} "yabai" "-m" (name mod) rest))
 
-(defn query
-  {:malli/schema [:->
-                  [:enum :displays :spaces :windows]
-                  [:or [:vector display-schema] [:vector space-schema] [:vector window-schema]]]}
-  [what]
-  (let [cmd-what (str "--" (name what))
-        res-str (yabai :query cmd-what)
-        res (parse-string res-str true)]
-    (into [] res)))
+
+(defn- display->entity [{:keys [id uuid index label frame spaces has-focus]}]
+  #:wmbb.display{:id id
+                 :uuid uuid
+                 :index index
+                 :label label
+                 :has-focus has-focus
+                 :spaces (map #(do [:wmbb.space/index %]) spaces)
+                 :x (:x frame)
+                 :y (:y frame)
+                 :w (:w frame)
+                 :h (:h frame)})
+
+(defn get-displays []
+  (let [res (-> (yabai :query "--displays")
+                (parse-string true))]
+    (map display->entity res)))
 
 (comment
-  (query :displays)
-  (query :spaces)
-  (query :windows)
-  END)
+  (get-displays)
+  #_end)
+
+
+(defn- space->entity [{:keys [windows index is-native-fullscreen type label id is-visible has-focus display last-window uuid first-window]}]
+  #:wmbb.space{:id id
+               :uuid uuid
+               :label label
+               :type type
+               :index index
+               :is-native-fullscreen is-native-fullscreen
+               :is-visible is-visible
+               :has-focus has-focus
+               :windows (map #(do [:wmbb.window/id %]) windows)
+               :display [:wmbb.display/index display]
+               :first-window first-window
+               :last-window last-window})
+
+(defn get-spaces []
+  (let [res (-> (yabai :query "--spaces")
+                (parse-string true))]
+    (map space->entity res)))
+
+(comment
+  (get-spaces)
+  #_end)
+
+
+(defn- window->entity [window]
+  #:wmbb.window{:id (:id window)
+                :title (:title window)
+                :pid (:pid window)
+                :app (:app window)
+                :role (:role window)
+                :subrole (:subrole window)
+                :x (-> window :frame :x)
+                :y (-> window :frame :y)
+                :w (-> window :frame :w)
+                :h (-> window :frame :h)
+                :is-minimized (:is-minimized window)
+                :is-native-fullscreen (:is-native-fullscreen window)
+                :is-sticky (:is-sticky window)
+                :is-floating (:is-floating window)
+                :is-grabbed (:is-grabbed window)
+                :is-hidden (:is-hidden window)
+                :is-visible (:is-visible window)
+                :has-focus (:has-focus window)
+                :has-fullscreen-zoom (:has-fullscreen-zoom window)
+                :has-ax-reference (:has-ax-reference window)
+                :has-shadow (:has-shadow window)
+                :has-parent-zoom (:has-parent-zoom window)
+                :can-move (:can-move window)
+                :can-resize (:can-resize window)
+                :stack-index (:stack-index window)
+                :level (:level window)
+                :sub-level (:sub-level window)
+                :layer (:layer window)
+                :sub-layer (:sub-layer window)
+                :split-type (:split-type window)
+                :opacity (:opacity window)
+                :display [:wmbb.display/index (:display window)]
+                :space [:wmbb.space/index (:space window)]
+                :root-window (:root-window window)
+                :split-child (:split-child window)
+                :scratchpad (:scratchpad window)})
+
+(defn get-windows []
+  (let [res (-> (yabai :query "--windows")
+                (parse-string true))]
+    (map window->entity res)))
+
+(comment
+  (get-windows)
+  #_end)
+
 
 (defn window-resize [window-id width height]
   (yabai :window (str window-id) "--resize" (str "abs:" width ":" height)))
 
-(defn window-move [window-id width height]
-  (yabai :window (str window-id) "--move" (str "abs:" width ":" height)))
+(defn window-move [window-id x y]
+  (yabai :window (str window-id) "--move" (str "abs:" x ":" y)))
 
 (defn window-focus [window-id]
   (yabai :window "--focus" (str window-id)))

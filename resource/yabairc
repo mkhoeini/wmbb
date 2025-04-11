@@ -12,7 +12,7 @@ yabai -m config window_origin_display cursor
 function y() {
   local event="$1"
   local arg="$2"
-  yabai -m signal --add event="$event" action="echo -n \"(ev-> $arg)\" | nc localhost 5556"
+  yabai -m signal --add event="$event" action="echo -n \"(ev> $arg)\" | nc localhost 5556"
 }
 
 # window signals
