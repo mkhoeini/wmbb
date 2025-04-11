@@ -7,33 +7,24 @@
 
 
 (defn update-data []
-  (let [displays (yabai/query :displays)
-        displays-diff (data/get-displays-diff displays)
-        spaces (yabai/query :spaces)
-        spaces-diff (data/get-spaces-diff spaces)
-        windows (yabai/query :windows)
-        windows-diff (data/get-windows-diff windows)]
-    (data/update-data displays-diff spaces-diff windows-diff)
-    (doseq [display (:inserted displays-diff)]
-      (manager/insert-display display))
-    (doseq [display (:deleted displays-diff)]
-      (manager/delete-display display))
-    (doseq [display (:updated displays-diff)]
-      (manager/update-display display))
-    (doseq [space (:inserted spaces-diff)]
-      (manager/insert-space space))
-    (doseq [space (:deleted spaces-diff)]
-      (manager/delete-space space))
-    (doseq [space (:updated spaces-diff)]
-      (manager/update-space space))
-    (doseq [window (:inserted windows-diff)]
-      (manager/insert-window window))
-    (doseq [window (:deleted windows-diff)]
-      (manager/delete-window window))
-    (doseq [window (:updated windows-diff)]
-      (manager/update-window window))))
+  (let [displays (yabai/get-displays)
+        spaces (yabai/get-spaces)
+        windows (yabai/get-windows)
+        {:keys [inserted updated deleted]} (data/update-data displays spaces windows)]
+    (doseq [w (filter :wmbb.window/id inserted)]
+      (manager/insert-window w))
+    (doseq [w (filter :wmbb.window/id updated)]
+      (manager/update-window w))
+    (doseq [w (filter :wmbb.window/id deleted)]
+      (manager/delete-window w))))
 
 
 (comment
+  (require '[wmbb.db :refer [db]])
+  db
   (update-data)
+  (let [displays (yabai/get-displays)
+        spaces (yabai/get-spaces)
+        windows (yabai/get-windows)]
+    (data/update-data displays spaces windows))
   #_end)

@@ -1,69 +1,101 @@
 (ns wmbb.manager
   (:require
-   [wmbb.db :as db]))
+   [sss.db :as db]
+   [wmbb.controller :as controller]
+   [wmbb.data :as data]))
+
+(defn get-active-manager-windows []
+  (let [current-space (data/get-active-space)
+        first-manager-window (db/find1 ['?e :wmbb.manager.window/space (:db/id current-space)]
+                                       '(not [?e :wmbb.manager.window/prev]))]
+    (->> first-manager-window
+         (iterate :wmbb.manager.window/next)
+         (take-while some?))))
+
+(comment
+  db/db
+  (get-active-manager-windows)
+  #_end)
+
+
+(def top-gap 50)
+(def bottom-gap 20)
+(def window-gap 10)
+
+
+(defn calc-window-position [ind _win-count focused-ind x y w h]
+  (let [target-h (- h top-gap bottom-gap)
+        target-w (/ h 1.414214)
+        screen-middle-x (+ x (/ w 2))
+        distance-between-windows-in-x (+ target-w window-gap)
+        target-x (+ screen-middle-x
+                    (- (/ target-w 2))
+                    (* distance-between-windows-in-x (- ind focused-ind)))
+        target-y (+ y top-gap)]
+    [target-x target-y target-w target-h]))
+
+
+(defn calc-layout []
+  (let [manager-windows (get-active-manager-windows)
+        wcount (count manager-windows)
+        focused (first (keep-indexed
+                        #(when (-> %2 :wmbb.manager.window/ref :wmbb.window/has-focus) %1)
+                        manager-windows))
+        {:wmbb.display/keys [x y w h]} (data/get-active-display)]
+    (doseq [[ind win] (zipmap (range) manager-windows)
+            :let [[x y w h] (calc-window-position ind wcount focused x y w h)]]
+      (db/transact #:wmbb.manager.window{:db/id (:db/id win)
+                                         :target-x x
+                                         :target-y y
+                                         :target-w w
+                                         :target-h h}))))
+
+
+(def window-is-manageable?
+  (every-pred :wmbb.window/has-ax-reference
+          #(= "AXWindow" (:wmbb.window/role %))
+          (complement :wmbb.window/is-minimized)
+          :wmbb.window/can-move
+          (complement :wmbb.window/is-floating)
+          #(= "normal" (:wmbb.window/layer %))
+          #(= "normal" (:wmbb.window/sub-layer %))
+          #(= "AXStandardWindow" (:wmbb.window/subrole %))
+          (complement :wmbb.window/is-grabbed)
+          (complement :wmbb.window/is-hidden)
+          :wmbb.window/is-visible))
+
+
+(defn insert-window [window]
+  (when (window-is-manageable? window)
+    (let [space-id (-> window :wmbb.window/space :db/id)
+          last-manager-window (db/find1 ['?e :wmbb.manager.window/space space-id]
+                                        '(not [?e :wmbbb.manager.window/next]))]
+      (if last-manager-window
+        (db/transact #:wmbb.manager.window{:db/id "manager"
+                                           :window-id (:wmbb.window/id window)
+                                           :ref (:db/id window)
+                                           :space space-id
+                                           :prev (:db/id last-manager-window)}
+                     [:db/add (:db/id last-manager-window) :wmbb.manager.window/next "manager"])
+        (db/transact #:wmbb.manager.window{:window-id (:wmbb.window/id window)
+                                           :ref (:db/id window)
+                                           :space space-id}))
+      (calc-layout)
+      (controller/apply-layout (get-active-manager-windows)))))
+
+
+(defn delete-window [window]
+  (calc-layout)
+  (controller/apply-layout (get-active-manager-windows)))
+
+
+(defn update-window [window]
+  (calc-layout)
+  (controller/apply-layout (get-active-manager-windows)))
 
 
 
-(defn insert-display
-  "No need to do anything"
-  [_])
 
-
-(defn delete-display
-  "No need to do anything"
-  [_])
-
-
-(defn update-display
-  "No need to do anything"
-  [_])
-
-
-(defn insert-space
-  "No need to do anything"
-  [_])
-
-
-(defn delete-space
-  "No need to do anything"
-  [_])
-
-
-(defn update-space
-  "No need to do anything"
-  [_])
-
-
-(defn insert-window
-  "Add window to the linked list"
-  [win-id]
-  (let [db-window (db/find1 '[?e :wmbb.window/id win-id])]))
-
-
-(defn delete-window
-  "No need to do anything"
-  [_])
-
-
-(defn update-window
-  "No need to do anything"
-  [_])
-
-
-
-
-;; (def window-is-manageable?
-;;   (every-pred :wmbb.window/has-ax-reference
-;;           #(= "AXWindow" (:wmbb.window/role %))
-;;           (complement :wmbb.window/is-minimized)
-;;           :wmbb.window/can-move
-;;           (complement :wmbb.window/is-floating)
-;;           #(= "normal" (:wmbb.window/layer %))
-;;           #(= "normal" (:wmbb.window/sub-layer %))
-;;           #(= "AXStandardWindow" (:wmbb.window/subrole %))
-;;           (complement :wmbb.window/is-grabbed)
-;;           (complement :wmbb.window/is-hidden)
-;;           :wmbb.window/is-visible))
 
 
 ;; (defn get-current-manageable-windows []

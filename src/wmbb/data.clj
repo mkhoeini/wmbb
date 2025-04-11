@@ -1,8 +1,6 @@
 (ns wmbb.data
   (:require
-   [wmbb.db :as db]))
-
-
+   [sss.db :as db]))
 
 (defn get-displays []
   (db/find* '[?e :wmbb.display/id]))
@@ -52,132 +50,70 @@
   #_END)
 
 
-(defn- display->tx [{:keys [id uuid index label frame spaces has-focus]}]
-  #:wmbb.display{:id id
-                 :uuid uuid
-                 :index index
-                 :label label
-                 :has-focus has-focus
-                 :spaces spaces
-                 :x (:x frame)
-                 :y (:y frame)
-                 :w (:w frame)
-                 :h (:h frame)})
+(defn- split-keys
+  "split a seq of maps to two seqs of maps splitting the set of keys.
+  s is the seq of maps
+  both-k is a key that should exist on both resulting seqs
+  ks is the keys that should be absent on the first and present on the second result seq"
+  [s both-k & ks]
+  (let [res (for [x s]
+              [(apply dissoc x ks)
+               (select-keys x (conj ks both-k))])]
+    [(map first res)
+     (map second res)]))
+
+(defn insert-info [displays spaces windows]
+  (let [[disp-ins disp-ref] (split-keys displays :wmbb.display/id :wmbb.display/spaces)
+        [spc-ins spc-ref] (split-keys spaces :wmbb.space/id :wmbb.space/display :wmbb.space/windows)
+        [win-ins win-ref] (split-keys windows :wmbb.window/id :wmbb.window/display :wmbb.window/space)]
+    (apply db/transact (concat disp-ins spc-ins win-ins))
+    (apply db/transact (concat disp-ref spc-ref win-ref))))
 
 
-(defn- space->tx [{:keys [windows index is-native-fullscreen type label id is-visible has-focus display last-window uuid first-window]}]
-  #:wmbb.space{:id id
-               :label label
-               :type type
-               :is-native-fullscreen is-native-fullscreen
-               :index index
-               :windows windows
-               :is-visible is-visible
-               :has-focus has-focus
-               :display display
-               :last-window last-window
-               :uuid uuid
-               :first-window first-window})
+(defn update-info [displays spaces windows]
+  (apply db/transact (concat displays spaces windows)))
 
 
-(defn- window->tx [window]
-  #:wmbb.window{:role (:role window)
-                :has-ax-reference (:has-ax-reference window)
-                :has-shadow (:has-shadow window)
-                :space (:space window)
-                :is-minimized (:is-minimized window)
-                :x (-> window :frame :x)
-                :y (-> window :frame :y)
-                :w (-> window :frame :w)
-                :h (-> window :frame :h)
-                :is-native-fullscreen (:is-native-fullscreen window)
-                :is-sticky (:is-sticky window)
-                :has-parent-zoom (:has-parent-zoom window)
-                :stack-index (:stack-index window)
-                :title (:title window)
-                :level (:level window)
-                :sub-level (:sub-level window)
-                :can-move (:can-move window)
-                :pid (:pid window)
-                :is-floating (:is-floating window)
-                :layer (:layer window)
-                :split-type (:split-type window)
-                :subrole (:subrole window)
-                :is-grabbed (:is-grabbed window)
-                :opacity (:opacity window)
-                :id (:id window)
-                :sub-layer (:sub-layer window)
-                :is-hidden (:is-hidden window)
-                :app (:app window)
-                :is-visible (:is-visible window)
-                :has-focus (:has-focus window)
-                :display (:display window)
-                :has-fullscreen-zoom (:has-fullscreen-zoom window)
-                :root-window (:root-window window)
-                :split-child (:split-child window)
-                :scratchpad (:scratchpad window)
-                :can-resize (:can-resize window)})
+(defn delete-info [displays spaces windows]
+  (let [disp-txs (for [d displays] [:db/retractEntity (:db/id d)])
+        spc-txs (for [s spaces] [:db/retractEntity (:db/id s)])
+        win-txs (for [w windows] [:db/retractEntity (:db/id w)])]
+    (apply db/transact (concat disp-txs spc-txs win-txs))))
 
 
-(defn- get-update-displays-transactions [inserted deleted updated]
-  (let [ins-tx (map display->tx inserted)
-        del-tx (map #(do [:db/retractEntity [:wmbb.display/id %]]) deleted)
-        upd-tx (map display->tx updated)]
-    (concat ins-tx del-tx upd-tx)))
+(defn- diff-by [existing given attr]
+  (let [existing-ids (set (map attr existing))
+        given-ids (set (map attr given))]
+    {:deleted (filter #(not (given-ids (attr %))) existing)
+     :updated (filter #(existing-ids (attr %)) given)
+     :inserted (filter #(not (existing-ids (attr %))) given)}))
+
+(defn diff-displays [displays]
+  (diff-by (get-displays) displays :wmbb.display/id))
+
+(defn diff-spaces [spaces]
+  (diff-by (get-spaces) spaces :wmbb.space/id))
+
+(defn diff-windows [windows]
+  (diff-by (get-windows) windows :wmbb.window/id))
 
 
-(defn- get-update-spaces-transactions [inserted deleted updated]
-  (let [ins-tx (map space->tx inserted)
-        del-tx (map #(do [:db/retractEntity [:wmbb.space/id %]]) deleted)
-        upd-tx (map space->tx updated)]
-    (concat ins-tx del-tx upd-tx)))
-
-
-(defn- get-update-windows-transactions [inserted deleted updated]
-  (let [ins-tx (map window->tx inserted)
-        del-tx (map #(do [:db/retractEntity [:wmbb.window/id %]]) deleted)
-        upd-tx (map window->tx updated)]
-    (concat ins-tx del-tx upd-tx)))
-
-
-(defn update-data [displays-diff spaces-diff windows-diff]
-  (let [displays-tx (get-update-displays-transactions
-                     (:inserted displays-diff)
-                     (:deleted displays-diff)
-                     (:updated displays-diff))
-        spaces-tx (get-update-spaces-transactions
-                   (:inserted spaces-diff)
-                   (:deleted spaces-diff)
-                   (:updated spaces-diff))
-        windows-tx (get-update-windows-transactions
-                    (:inserted windows-diff)
-                    (:deleted windows-diff)
-                    (:updated windows-diff))]
-    (apply db/transact (concat displays-tx spaces-tx windows-tx))))
-
-
-(defn get-displays-diff [displays]
-  (let [existing-displays (get-displays)
-        existing-ids (set (map :wmbb.display/id existing-displays))
-        given-ids (set (map :id displays))]
-    {:deleted (filter #(not (given-ids %)) existing-ids)
-     :updated (filter #(existing-ids (:id %)) displays)
-     :inserted (filter #(not (existing-ids (:id %))) displays)}))
-
-
-(defn get-spaces-diff [spaces]
-  (let [existing-spaces (get-spaces)
-        existing-ids (set (map :wmbb.space/id existing-spaces))
-        given-ids (set (map :id spaces))]
-    {:deleted (filter #(not (given-ids %)) existing-ids)
-     :updated (filter #(existing-ids (:id %)) spaces)
-     :inserted (filter #(not (existing-ids (:id %))) spaces)}))
-
-
-(defn get-windows-diff [windows]
-  (let [existing-windows (get-windows)
-        existing-ids (set (map :wmbb.window/id existing-windows))
-        given-ids (set (map :id windows))]
-    {:deleted (filter #(not (given-ids %)) existing-ids)
-     :updated (filter #(existing-ids (:id %)) windows)
-     :inserted (filter #(not (existing-ids (:id %))) windows)}))
+(defn update-data [displays spaces windows]
+  (let [displays-diff (diff-displays displays)
+        spaces-diff (diff-spaces spaces)
+        windows-diff (diff-windows windows)]
+    (insert-info (:inserted displays-diff) (:inserted spaces-diff) (:inserted windows-diff))
+    (update-info (:updated displays-diff) (:updated spaces-diff) (:updated windows-diff))
+    (delete-info (:deleted displays-diff) (:deleted spaces-diff) (:deleted windows-diff))
+    {:inserted (concat
+                (for [d (:inserted displays-diff)] (db/find1 ['?e :wmbb.display/id (:wmbb.display/id d)]))
+                (for [s (:inserted spaces-diff)] (db/find1 ['?e :wmbb.space/id (:wmbb.space/id s)]))
+                (for [w (:inserted windows-diff)] (db/find1 ['?e :wmbb.window/id (:wmbb.window/id w)])))
+     :updated (concat
+               (for [d (:updated displays-diff)] (db/find1 ['?e :wmbb.display/id (:wmbb.display/id d)]))
+               (for [s (:updated spaces-diff)] (db/find1 ['?e :wmbb.space/id (:wmbb.space/id s)]))
+               (for [w (:updated windows-diff)] (db/find1 ['?e :wmbb.window/id (:wmbb.window/id w)])))
+     :deleted (concat
+               (for [d (:deleted displays-diff)] (db/find1 ['?e :wmbb.display/id (:wmbb.display/id d)]))
+               (for [s (:deleted spaces-diff)] (db/find1 ['?e :wmbb.space/id (:wmbb.space/id s)]))
+               (for [w (:deleted windows-diff)] (db/find1 ['?e :wmbb.window/id (:wmbb.window/id w)])))}))
