@@ -12,7 +12,7 @@
     db))
 
 
-(defn transact [system & tx]
+(defn transact! [system & tx]
   (let [tx-data (d/transact! (::db system) tx)]
     (log/debug "last transaction" tx-data)
     tx-data))

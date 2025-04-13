@@ -66,19 +66,19 @@
   (let [[disp-ins disp-ref] (split-keys displays :wmbb.display/id :wmbb.display/spaces)
         [spc-ins spc-ref] (split-keys spaces :wmbb.space/id :wmbb.space/display :wmbb.space/windows)
         [win-ins win-ref] (split-keys windows :wmbb.window/id :wmbb.window/display :wmbb.window/space)]
-    (apply db/transact (concat disp-ins spc-ins win-ins))
-    (apply db/transact (concat disp-ref spc-ref win-ref))))
+    (apply db/transact! (concat disp-ins spc-ins win-ins))
+    (apply db/transact! (concat disp-ref spc-ref win-ref))))
 
 
 (defn update-info [displays spaces windows]
-  (apply db/transact (concat displays spaces windows)))
+  (apply db/transact! (concat displays spaces windows)))
 
 
 (defn delete-info [displays spaces windows]
   (let [disp-txs (for [d displays] [:db/retractEntity (:db/id d)])
         spc-txs (for [s spaces] [:db/retractEntity (:db/id s)])
         win-txs (for [w windows] [:db/retractEntity (:db/id w)])]
-    (apply db/transact (concat disp-txs spc-txs win-txs))))
+    (apply db/transact! (concat disp-txs spc-txs win-txs))))
 
 
 (defn- diff-by [existing given attr]

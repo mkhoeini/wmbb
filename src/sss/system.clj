@@ -2,14 +2,19 @@
   (:require
     [integrant.core :as ig]
     [sss.event :as ev]
-    [sss.db :as db]))
+    [sss.db :as db]
+    [sss.signal :as sig]
+    [sss.subscription :as sub]))
 
 
 
 (def default-config
-  {::ev/event-chan {:buf 1000}
+  {::ev/events {:buf 1000}
+   ::ev/event-loop {}
    ::db/db {:schema {}
-            :seed []}})
+            :seed []}
+   ::sig/signals {}
+   ::sub/subscriptions []})
 
 
 (defn- get-config [opts]

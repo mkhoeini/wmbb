@@ -4,7 +4,9 @@
    [sss.db :as db]
    [sss.entity :as ent]
    [sss.log :as log]
-   [sss.system :as sys]))
+   [sss.system :as sys]
+   [sss.signal :as sig]
+   [sss.subscription :as sub]))
 
 
 
@@ -18,7 +20,9 @@
 (defn create-system [config]
   (let [{:keys [entities init signals subscriptions reconciler commands tags behaviors]} config]
     (sys/create-system {::db/db {:schema (ent/to-schema entities)
-                                 :seed init}})))
+                                 :seed init}
+                        ::sig/signals signals
+                        ::sub/subscriptions subscriptions})))
 
 
 (defn halt-system! [system]

@@ -44,11 +44,11 @@
         {:wmbb.display/keys [x y w h]} (data/get-active-display)]
     (doseq [[ind win] (zipmap (range) manager-windows)
             :let [[x y w h] (calc-window-position ind wcount focused x y w h)]]
-      (db/transact #:wmbb.manager.window{:db/id (:db/id win)
-                                         :target-x x
-                                         :target-y y
-                                         :target-w w
-                                         :target-h h}))))
+      (db/transact! #:wmbb.manager.window{:db/id (:db/id win)
+                                          :target-x x
+                                          :target-y y
+                                          :target-w w
+                                          :target-h h}))))
 
 
 (def window-is-manageable?
@@ -71,15 +71,15 @@
           last-manager-window (db/find1 ['?e :wmbb.manager.window/space space-id]
                                         '(not [?e :wmbbb.manager.window/next]))]
       (if last-manager-window
-        (db/transact #:wmbb.manager.window{:db/id "manager"
-                                           :window-id (:wmbb.window/id window)
-                                           :ref (:db/id window)
-                                           :space space-id
-                                           :prev (:db/id last-manager-window)}
+        (db/transact! #:wmbb.manager.window{:db/id "manager"
+                                            :window-id (:wmbb.window/id window)
+                                            :ref (:db/id window)
+                                            :space space-id
+                                            :prev (:db/id last-manager-window)}
                      [:db/add (:db/id last-manager-window) :wmbb.manager.window/next "manager"])
-        (db/transact #:wmbb.manager.window{:window-id (:wmbb.window/id window)
-                                           :ref (:db/id window)
-                                           :space space-id}))
+        (db/transact! #:wmbb.manager.window{:window-id (:wmbb.window/id window)
+                                            :ref (:db/id window)
+                                            :space space-id}))
       (calc-layout)
       (controller/apply-layout (get-active-manager-windows)))))
 

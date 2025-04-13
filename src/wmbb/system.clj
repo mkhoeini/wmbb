@@ -31,8 +31,6 @@
 
 (defstate system-def
   :start (when (.isAlive yabai/yabai-process)
-           ;; Give yabai process a second to properly start
-           (Thread/sleep 1000)
            {:entities [entity/display entity/space entity/window entity/manager-window]
             :init (concat
                    (map disp->seed (yabai/get-displays))
@@ -49,6 +47,13 @@
 (defstate system
   :start (sss/create-system system-def)
   :stop (sss/halt-system! system))
+
+(comment
+  (require '[sss.subscription :as s])
+  (s/add-sub! system (:sss.subscription/name subs/window-moved) {})
+  (s/update-sub-status! system {:db/id 22} :enable)
+  (s/get-all-subs system)
+  #_end)
 
 
 (defn start-system! []
