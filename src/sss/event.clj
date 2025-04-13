@@ -2,7 +2,10 @@
   (:require
    [clojure.core.async :as async]
    [integrant.core :as ig]
-   [sss.behavior :as bh]))
+   [sss.behavior :as bh]
+   [sss.log :as log]))
+
+
 
 (defmethod ig/init-key ::events [_ opts]
   (let [ch (async/chan (:buf opts))
@@ -16,10 +19,14 @@
 
 
 (defn fire-event [system target ev-type ev-data]
-  (async/put! (-> system ::events :chan)
-          {::type ev-type
-           ::target target
-           ::data ev-data}))
+  (log/debug "fire event" {:system system
+                           :target target
+                           :type type
+                           :data data})
+  (async/>!! (-> system ::events :chan)
+             {::type ev-type
+              ::target target
+              ::data ev-data}))
 
 
 (defn add-sub-chan [system ch]
