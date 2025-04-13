@@ -10,16 +10,17 @@
 
 
 (def default-config
-  {::ev/events {:buf 1000}
-   ::ev/event-loop {}
-   ::db/db {:schema {}
-            :seed []}
-   ::sig/signals {}
-   ::sub/subscriptions []})
+  {::ev/events-chan {:buf 1000}
+   ::db/db {}})
 
 
-(defn- get-config [opts]
-  (let [merge-fn (fn [a b]
+(defn- get-config [config]
+  (let [{:keys [entities init signals subscriptions reconciler commands tags behaviors]} config
+        opts {::db/db {:schema (ent/to-schema entities)
+                       :seed init}
+              ::sig/signals signals
+              ::sub/subscriptions subscriptions}
+        merge-fn (fn [a b]
                    (if (map? a)
                      (merge a b)
                      b))]
@@ -27,11 +28,8 @@
 
 
 (defn create-system [config]
-  (let [{:keys [entities init signals subscriptions reconciler commands tags behaviors]} config]
-    (ig/init (get-config {::db/db {:schema (ent/to-schema entities)
-                                   :seed init}
-                          ::sig/signals signals
-                          ::sub/subscriptions subscriptions}))))
+  (let []
+    (ig/init (get-config config))))
 
 
 (defn halt-system! [system]
