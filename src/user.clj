@@ -8,8 +8,6 @@
    [wmbb.system :as sys]
    [wmbb.yabai :as yabai]))
 
-;; used by yabai signals to call us
-(def ev> yabai/put-event!)
 
 
 (defn start-malli! []
@@ -36,3 +34,9 @@
 (def system
   "make wmbb system available to user namespace"
   sys/system)
+
+
+(defn ev>
+  "used by yabai signals to call us"
+  [ev]
+  (yabai/put-event! system ev))

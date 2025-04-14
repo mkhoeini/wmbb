@@ -1,23 +1,18 @@
 (ns wmbb.yabai
   (:require
    [cheshire.core :refer [parse-string]]
-   [clojure.core.async :as async]
    [clojure.java.io :as io]
    [clojure.java.process :as process]
    [mount.core :refer [defstate]]
-   [wmbb.socket :as s])
+   [wmbb.socket :as s]
+   [sss.core :as sss])
   (:import
    (java.io File)))
 
 
 
-(defstate events
-  :start (async/chan (async/sliding-buffer 100))
-  :stop (async/close! events))
-
-
-(defn put-event! [ev]
-  (async/put! events ev))
+(defn put-event! [system ev]
+  (sss/send-signal system ::events ev))
 
 
 (defonce ^:private config-file
