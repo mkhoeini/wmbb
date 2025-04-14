@@ -134,11 +134,14 @@
                 (parse-string true))]
     (map window->entity res)))
 
-; TODO
-(defn get-window [id])
+(defn get-window [id]
+  (let [res (-> (yabai :query "--windows" "--window" (str id))
+                (parse-string true))]
+    (window->entity res)))
 
 (comment
   (get-windows)
+  (get-window 26567)
   #_end)
 
 
