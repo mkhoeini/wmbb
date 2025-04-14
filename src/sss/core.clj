@@ -2,7 +2,8 @@
   (:require
    [sss.system :as sys]
    [sss.entity :as ent]
-   [sss.signal :as sig]))
+   [sss.signal :as sig]
+   [sss.db :as db]))
 
 
 
@@ -50,10 +51,11 @@
   "add an instance of an entity and return it's entity ref"
   [system archetype instance])
 
-; TODO
+
 (defn get-entity
   "get an entity instance ref by running a query"
-  [system & where])
+  [system & where]
+  (apply db/find1 system where))
 
 
 (defn make-entity-archetype [name fields]
