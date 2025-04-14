@@ -1,102 +1,78 @@
 (ns wmbb.subscriptions
   (:require
-   [sss.subscription :refer [defsub]]))
+   [sss.core :as sss]
+   [wmbb.event :as ev]
+   [wmbb.yabai :as yabai]))
 
 
 
-(defsub :yabai window-created [system signal conf]
-  (= :yabai.window/created (:event signal))
-  {})
+(def subscriptions
+  {::window-created {::signal ::yabai/events
+                     ::interesting? (fn filter-window-created [_ signal]
+                                      (= :yabai.window/created (:event signal)))
+                     ::to-event (fn window-created-to-event [system signal]
+                                  (let [win-id (-> signal :data :yabai.window/id)
+                                        win (sss/get-entity system ['?e :wmbb.window/id win-id])]
+                                    #:sss.event{:name ::ev/window-created
+                                                :target win
+                                                :data (yabai/get-window win-id)}))}
 
+   ::window-destroyed {::signal ::yabai/events
+                       ::interesting? (fn [_ signal] (= :yabai.window/destroyed (:event signal)))
+                       ::to-event (fn [_ _] {})}
 
-(defsub :yabai window-destroyed [system signal conf]
-  (= :yabai.window/destroyed (:event signal))
-  {})
+   ::window-focused {::signal ::yabai/events
+                     ::interesting? (fn [_ signal] (= :yabai.window/focused (:event signal)))
+                     ::to-event (fn [_ _] {})}
 
+   ::window-moved {::signal ::yabai/events
+                   ::interesting? (fn [_ signal] (= :yabai.window/moved (:event signal)))
+                   ::to-event (fn [_ _] {})}
 
-(defsub :yabai window-focused [system signal conf]
-  (= :yabai.window/focused (:event signal))
-  {})
+   ::window-resized {::signal ::yabai/events
+                     ::interesting? (fn [_ signal] (= :yabai.window/resized (:event signal)))
+                     ::to-event (fn [_ _] {})}
 
+   ::window-minimized {::signal ::yabai/events
+                       ::interesting? (fn [_ signal] (= :yabai.window/minimized (:event signal)))
+                       ::to-event (fn [_ _] {})}
 
-(defsub :yabai window-moved [system signal conf]
-  (= :yabai.window/moved (:event signal))
-  {})
+   ::window-deminimized {::signal ::yabai/events
+                         ::interesting? (fn [_ signal] (= :yabai.window/deminimized (:event signal)))
+                         ::to-event (fn [_ _] {})}
 
+   ::window-title-changed {::signal ::yabai/events
+                           ::interesting? (fn [_ signal] (= :yabai.window/title_changed (:event signal)))
+                           ::to-event (fn [_ _] {})}
 
-(defsub :yabai window-resized [system signal conf]
-  (= :yabai.window/resized (:event signal))
-  {})
+   ::space-created {::signal ::yabai/events
+                    ::interesting? (fn [_ signal] (= :yabai.space/created (:event signal)))
+                    ::to-event (fn [_ _] {})}
 
+   ::space-destroyed {::signal ::yabai/events
+                      ::interesting? (fn [_ signal] (= :yabai.space/destroyed (:event signal)))
+                      ::to-event (fn [_ _] {})}
 
-(defsub :yabai window-minimized [system signal conf]
-  (= :yabai.window/minimized (:event signal))
-  {})
+   ::space-changed {::signal ::yabai/events
+                    ::interesting? (fn [_ signal] (= :yabai.space/changed (:event signal)))
+                    ::to-event (fn [_ _] {})}
 
+   ::display-added {::signal ::yabai/events
+                    ::interesting? (fn [_ signal] (= :yabai.display/added (:event signal)))
+                    ::to-event (fn [_ _] {})}
 
-(defsub :yabai window-deminimized [system signal conf]
-  (= :yabai.window/deminimized (:event signal))
-  {})
+   ::display-removed {::signal ::yabai/events
+                      ::interesting? (fn [_ signal] (= :yabai.display/removed (:event signal)))
+                      ::to-event (fn [_ _] {})}
 
+   ::display-moved {::signal ::yabai/events
+                    ::interesting? (fn [_ signal] (= :yabai.display/moved (:event signal)))
+                    ::to-event (fn [_ _] {})}
 
-(defsub :yabai window-title-changed [system signal conf]
-  (= :yabai.window/title_changed (:event signal))
-  {})
+   ::display-resized {::signal ::yabai/events
+                      ::interesting? (fn [_ signal] (= :yabai.display/resized (:event signal)))
+                      ::to-event (fn [_ _] {})}
 
-
-(defsub :yabai space-created [system signal conf]
-  (= :yabai.space/created (:event signal))
-  {})
-
-
-(defsub :yabai space-destroyed [system signal conf]
-  (= :yabai.space/destroyed (:event signal))
-  {})
-
-
-(defsub :yabai space-changed [system signal conf]
-  (= :yabai.space/changed (:event signal))
-  {})
-
-
-(defsub :yabai display-added [system signal conf]
-  (= :yabai.display/added (:event signal))
-  {})
-
-
-(defsub :yabai display-removed [system signal conf]
-  (= :yabai.display/removed (:event signal))
-  {})
-
-
-(defsub :yabai display-moved [system signal conf]
-  (= :yabai.display/moved (:event signal))
-  {})
-
-
-(defsub :yabai display-resized [system signal conf]
-  (= :yabai.display/resized (:event signal))
-  {})
-
-
-(defsub :yabai display-changed [system signal conf]
-  (= :yabai.display/changed (:event signal))
-  {})
-
-
-(def subscriptions [window-created
-                    window-destroyed
-                    window-focused
-                    window-moved
-                    window-resized
-                    window-minimized
-                    window-deminimized
-                    window-title-changed
-                    space-created
-                    space-destroyed
-                    space-changed
-                    display-added
-                    display-removed
-                    display-moved
-                    display-resized
-                    display-changed])
+   ::display-changed {::signal ::yabai/events
+                      ::interesting? (fn [_ signal] (= :yabai.display/changed (:event signal)))
+                      ::to-event (fn [_ _] {})}})

@@ -1,14 +1,15 @@
 (ns user
   (:require
+   [clojure.tools.namespace.repl :as tn]
    [dev.nu.morse :as morse]
    [malli.dev :as mdev]
    [malli.dev.pretty :as mpret]
    [mount.core :as mount]
-   [wmbb.yabai :as yabai]
-   [clojure.tools.namespace.repl :as tn]))
+   [wmbb.system :as sys]
+   [wmbb.yabai :as yabai]))
 
 ;; used by yabai signals to call us
-(def ev> yabai/put-event)
+(def ev> yabai/put-event!)
 
 
 (defn start-malli! []
@@ -30,3 +31,8 @@
 (defn reset []
   (mount/stop)
   (tn/refresh :after `go))
+
+
+(def system
+  "make wmbb system available to user namespace"
+  sys/system)

@@ -1,21 +1,22 @@
 (ns wmbb.yabai
   (:require
    [cheshire.core :refer [parse-string]]
+   [clojure.core.async :as async]
    [clojure.java.io :as io]
-   [clojure.java.process :as jproc]
+   [clojure.java.process :as process]
    [mount.core :refer [defstate]]
-   [clojure.core.async :as async])
+   [wmbb.socket :as s])
   (:import
    (java.io File)))
 
 
 
 (defstate events
-  :start (async/chan 1000)
+  :start (async/chan (async/sliding-buffer 100))
   :stop (async/close! events))
 
 
-(defn put-event [ev]
+(defn put-event! [ev]
   (async/put! events ev))
 
 
@@ -29,16 +30,19 @@
 (defstate ^:private yabai-output :start (File/createTempFile "yabai" "out"))
 
 (defstate yabai-process
-  :start (let [p (jproc/start {:err :stdout :out (jproc/to-file yabai-output)} "yabai" "--config" (.getAbsolutePath config-file))]
-           ;; Give yabai process a second to properly start
-           (Thread/sleep 1000)
-           (println "Started yabai. Output is written into" (.getAbsolutePath yabai-output))
-           p)
+  :start (when s/socket-server
+           (let [p (process/start
+                    {:err :stdout :out (process/to-file yabai-output)}
+                    "yabai" "--config" (.getAbsolutePath config-file))]
+             ;; Give yabai process a second to properly start
+             (Thread/sleep 1000)
+             (println "Started yabai. Output is written into" (.getAbsolutePath yabai-output))
+             p))
   :stop (.destroy yabai-process))
 
 
 (defn yabai [mod & rest]
-  (apply jproc/exec {:err :stdout} "yabai" "-m" (name mod) rest))
+  (apply process/exec {:err :stdout} "yabai" "-m" (name mod) rest))
 
 
 (defn- display->entity [{:keys [id uuid index label frame spaces has-focus]}]
@@ -129,6 +133,9 @@
   (let [res (-> (yabai :query "--windows")
                 (parse-string true))]
     (map window->entity res)))
+
+; TODO
+(defn get-window [id])
 
 (comment
   (get-windows)

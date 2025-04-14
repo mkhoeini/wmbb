@@ -7,22 +7,27 @@
 
 
 
-(defmethod ig/init-key ::events [_ opts]
+(def ^:private mix-for-chan (atom {}))
+
+
+(defmethod ig/init-key ::events-chan [_ opts]
   (let [ch (async/chan (:buf opts))
         mix (async/mix ch)]
-    {:chan ch :mix mix}))
+    (swap! mix-for-chan assoc ch mix)
+    ch))
 
 
-(defmethod ig/halt-key! ::events [_ {ch :chan m :mix}]
-  (async/unmix-all m)
+(defmethod ig/halt-key! ::events-chan [_ {ch :chan}]
+  (async/unmix-all (@mix-for-chan ch))
+  (swap! mix-for-chan dissoc ch)
   (async/close! ch))
 
 
 (defn fire-event [system target ev-type ev-data]
   (log/debug "fire event" {:system system
                            :target target
-                           :type type
-                           :data data})
+                           :type ev-type
+                           :data ev-data})
   (async/>!! (-> system ::events :chan)
              {::type ev-type
               ::target target

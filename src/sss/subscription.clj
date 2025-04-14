@@ -9,14 +9,6 @@
 
 
 
-(defmacro defsub [signal sub-name binding filter-expr map-expr]
-  `(def ~sub-name
-     {::name ~(keyword (str (ns-name *ns*)) (str sub-name))
-      ::signal ~signal
-      ::filter (fn ~sub-name ~binding ~filter-expr)
-      ::map (fn ~sub-name ~binding ~map-expr)}))
-
-
 (defmethod ig/init-key ::subscriptions [_ val]
   (->> val
        (map #(vector (::name %) %))
