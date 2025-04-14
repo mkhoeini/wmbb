@@ -1,7 +1,8 @@
 (ns sss.core
   (:require
    [sss.system :as sys]
-   [sss.entity :as ent]))
+   [sss.entity :as ent]
+   [sss.signal :as sig]))
 
 
 
@@ -38,10 +39,11 @@
   (sys/halt-system! system))
 
 
-; TODO
 (defn send-signal
   "send a signal to the system"
-  [system sig data])
+  [system sig data]
+  (sig/send-signal system sig data))
+
 
 ; TODO
 (defn add-entity!
