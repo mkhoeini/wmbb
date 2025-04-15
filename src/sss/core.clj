@@ -40,23 +40,29 @@
   (sys/halt-system! system))
 
 
+(def ^:dynamic *system*
+  "Thread-local system ref to use in context of with-system and other functions in this namespace"
+  nil)
+
+
+(defmacro with-system
+  "Set a thread-local context with the suplied system to call the other functions"
+  [system & forms]
+  `(binding [*system ~system] ~@forms))
+
+
 (defn send-signal
   "send a signal to the system"
-  [system sig data]
-  (sig/send-signal system sig data))
-
-
-(defn add-entity!
-  "add an instance of an entity and return it's entity ref"
-  [system archetype instance]
-  (db/transact! system (assoc instance
-                        ::ent/archetype [:sss.entity.archetype/name archetype])))
+  [sig data]
+  {:pre [(some? *system*)]}
+  (sig/send-signal *system* sig data))
 
 
 (defn get-entity
   "get an entity instance ref by running a query"
-  [system & where]
-  (apply db/find1 system where))
+  [& where]
+  {:pre [(some? *system*)]}
+  (apply db/find1 *system* where))
 
 
 (defn make-entity-archetype [name fields]
