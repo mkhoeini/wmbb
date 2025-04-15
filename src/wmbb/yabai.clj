@@ -12,6 +12,7 @@
 
 
 (defn put-event! [ev]
+  #_(tap> ["got event" ev])
   (sss/send-signal ::events ev))
 
 

@@ -24,15 +24,18 @@
                         :buf-fn #(async/sliding-buffer 100)}})
 
 
-(defn get-config [config]
-  (let [{:keys [entities init signals subscriptions reconciler commands tags behaviors]} config
-        opts {::db/db {:schema (ent/to-schema entities)}
+(defn get-config [schema signals]
+  (let [opts {::db/db {:schema schema}
               ::sig/signals-chans {:signals signals}}]
     (merge-deep default-config opts)))
 
 
 (defn create-system [config]
-  (ig/init (get-config config)))
+  (let [{:keys [entities init signals subscriptions reconciler commands tags behaviors]} config
+        schema (ent/to-schema entities)
+        system (ig/init (get-config schema signals))]
+    (sig/init! system signals)
+    system))
 
 
 (defn halt-system! [system]

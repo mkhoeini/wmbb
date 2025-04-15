@@ -1,7 +1,8 @@
 (ns sss.signal
   (:require
     [integrant.core :as ig]
-    [clojure.core.async :as async]))
+    [clojure.core.async :as async]
+    [sss.db :as db]))
 
 
 
@@ -15,3 +16,9 @@
   (let [ch (get-in system [::signals-chans sig])]
     (async/>!! ch {:signal sig
                    :data data})))
+
+
+(defn init! [system signals]
+  (->> signals
+       (map-indexed #(hash-map :db/id (- -1 %1) ::name %2))
+       (apply db/transact! system)))
