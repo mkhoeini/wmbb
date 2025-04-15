@@ -11,8 +11,8 @@
 
 
 
-(defn put-event! [system ev]
-  (sss/send-signal system ::events ev))
+(defn put-event! [ev]
+  (sss/send-signal ::events ev))
 
 
 (defonce ^:private config-file

@@ -48,7 +48,7 @@
 (defmacro with-system
   "Set a thread-local context with the suplied system to call the other functions"
   [system & forms]
-  `(binding [*system ~system] ~@forms))
+  `(binding [*system* ~system] ~@forms))
 
 
 (defn send-signal

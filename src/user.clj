@@ -6,7 +6,8 @@
    [malli.dev.pretty :as mpret]
    [mount.core :as mount]
    [wmbb.system :as sys]
-   [wmbb.yabai :as yabai]))
+   [wmbb.yabai :as yabai]
+   [sss.core :as sss]))
 
 
 
@@ -39,4 +40,5 @@
 (defn ev>
   "used by yabai signals to call us"
   [ev]
-  (yabai/put-event! system ev))
+  (sss/with-system system
+    (yabai/put-event! ev)))
