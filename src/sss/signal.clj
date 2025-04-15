@@ -20,5 +20,5 @@
 
 (defn init! [system signals]
   (->> signals
-       (map-indexed #(hash-map :db/id (- -1 %1) ::name %2))
+       (map-indexed #(hash-map ::name %2))
        (apply db/transact! system)))
