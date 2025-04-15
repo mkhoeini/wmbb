@@ -34,11 +34,11 @@
 
 (def system
   "make wmbb system available to user namespace"
-  sys/system)
+  #'sys/system)
 
 
 (defn ev>
   "used by yabai signals to call us"
   [ev]
-  (sss/with-system system
-    (yabai/put-event! ev)))
+  (sss/with-system @system
+    (#'yabai/put-event! ev)))
