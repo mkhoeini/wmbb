@@ -21,5 +21,4 @@
 
 
 (defn to-schema [entities]
-  (let [ent-schema (->> entities (map ::schema) (apply merge))]
-    (assoc ent-schema ::archetype {:db/valueType :db.type/ref})))
+  (->> entities (map ::schema) (apply merge)))

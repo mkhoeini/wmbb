@@ -6,8 +6,13 @@
 
 
 
+(def system-schema
+  {:sss.entity/archetype {:db/valueType :db.type/ref}
+   :sss.signal/name {:db/unique :db.unique/identity}})
+
+
 (defmethod ig/init-key ::db [_ {:keys [schema]}]
-  (d/create-conn schema))
+  (d/create-conn (merge system-schema schema)))
 
 
 (defn transact! [system & tx]
