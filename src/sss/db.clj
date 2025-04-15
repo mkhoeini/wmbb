@@ -6,10 +6,8 @@
 
 
 
-(defmethod ig/init-key ::db [_ {:keys [schema seed]}]
-  (let [db (d/create-conn schema)]
-    (d/transact! db seed)
-    db))
+(defmethod ig/init-key ::db [_ {:keys [schema]}]
+  (d/create-conn schema))
 
 
 (defn transact! [system & tx]

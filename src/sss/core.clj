@@ -46,10 +46,11 @@
   (sig/send-signal system sig data))
 
 
-; TODO
 (defn add-entity!
   "add an instance of an entity and return it's entity ref"
-  [system archetype instance])
+  [system archetype instance]
+  (db/transact! system (assoc instance
+                        ::ent/archetype [:sss.entity.archetype/name archetype])))
 
 
 (defn get-entity

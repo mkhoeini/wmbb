@@ -99,7 +99,6 @@
 
 
 (defn get-initial-entity-values []
-  (concat
-   (map disp->seed (yabai/get-displays))
-   (map spc->seed (yabai/get-spaces))
-   (map win->seed (yabai/get-windows))))
+  {::display (map disp->seed (yabai/get-displays))
+   ::space (map spc->seed (yabai/get-spaces))
+   ::window (map win->seed (yabai/get-windows))})

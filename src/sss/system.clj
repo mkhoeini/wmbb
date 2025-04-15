@@ -4,7 +4,6 @@
     [sss.event :as ev]
     [sss.db :as db]
     [sss.signal :as sig]
-    [sss.subscription :as sub]
     [sss.entity :as ent]
     [clojure.core.async :as async]))
 
@@ -20,15 +19,14 @@
 
 (def default-config
   {::ev/events-chan {:buf 1000}
-   ::db/db {}
+   ::db/db {:schema {}}
    ::sig/signals-chans {:signals []
                         :buf-fn #(async/sliding-buffer 100)}})
 
 
 (defn get-config [config]
   (let [{:keys [entities init signals subscriptions reconciler commands tags behaviors]} config
-        opts {::db/db {:schema (ent/to-schema entities)
-                       :seed init}
+        opts {::db/db {:schema (ent/to-schema entities)}
               ::sig/signals-chans {:signals signals}}]
     (merge-deep default-config opts)))
 
