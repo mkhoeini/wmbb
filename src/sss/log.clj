@@ -22,10 +22,12 @@
   (let [loc (assoc (meta &form)
                    :file *file*
                    :form &form)]
-    `(log :debug '~loc ~msg ~extra)))
+    `(log :debug '~loc ~msg (list ~@extra))))
 
 (comment
   (debug "hi")
+  (debug "hi" 1)
+  (debug "test" {:a :b})
   #_end)
 
 
