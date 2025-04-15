@@ -17,7 +17,7 @@
     ch))
 
 
-(defmethod ig/halt-key! ::events-chan [_ {ch :chan}]
+(defmethod ig/halt-key! ::events-chan [_ ch]
   (async/unmix-all (@mix-for-chan ch))
   (swap! mix-for-chan dissoc ch)
   (async/close! ch))
