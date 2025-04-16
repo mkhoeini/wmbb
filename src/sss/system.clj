@@ -1,11 +1,12 @@
 (ns sss.system
   (:require
-    [integrant.core :as ig]
-    [sss.event :as ev]
-    [sss.db :as db]
-    [sss.signal :as sig]
-    [sss.entity :as ent]
-    [clojure.core.async :as async]))
+   [clojure.core.async :as async]
+   [integrant.core :as ig]
+   [sss.db :as db]
+   [sss.entity :as ent]
+   [sss.event :as ev]
+   [sss.signal :as sig]
+   [sss.subscription :as sub]))
 
 
 
@@ -18,23 +19,27 @@
 
 
 (def default-config
-  {::ev/events-chan {:buf 1000}
+  {::ev/events-chan {:buf-fn #(async/sliding-buffer 1000)}
    ::db/db {:schema {}}
    ::sig/signals-chans {:signals []
-                        :buf-fn #(async/sliding-buffer 100)}})
+                        :buf-fn #(async/sliding-buffer 100)}
+   ::sub/subscriptions-chans {:subscriptions {}
+                              :buf-fn #(async/sliding-buffer 20)}})
 
 
-(defn get-config [schema signals]
+(defn get-config [schema signals subscriptions]
   (let [opts {::db/db {:schema schema}
-              ::sig/signals-chans {:signals signals}}]
+              ::sig/signals-chans {:signals signals}
+              ::sub/subscriptions-chans {:subscriptions subscriptions}}]
     (merge-deep default-config opts)))
 
 
 (defn create-system [config]
   (let [{:keys [entities init signals subscriptions reconciler commands tags behaviors]} config
         schema (ent/to-schema entities)
-        system (ig/init (get-config schema signals))]
+        system (ig/init (get-config schema signals subscriptions))]
     (sig/init! system signals)
+    (sub/init! system subscriptions)
     system))
 
 

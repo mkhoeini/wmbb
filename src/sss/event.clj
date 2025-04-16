@@ -2,16 +2,15 @@
   (:require
    [clojure.core.async :as async]
    [integrant.core :as ig]
-   [sss.behavior :as bh]
-   [sss.log :as log]))
+   [sss.behavior :as bh]))
 
 
 
 (def ^:private mix-for-chan (atom {}))
 
 
-(defmethod ig/init-key ::events-chan [_ opts]
-  (let [ch (async/chan (:buf opts))
+(defmethod ig/init-key ::events-chan [_ {:keys [buf-fn]}]
+  (let [ch (async/chan (buf-fn))
         mix (async/mix ch)]
     (swap! mix-for-chan assoc ch mix)
     ch))
@@ -23,19 +22,10 @@
   (async/close! ch))
 
 
-(defn fire-event [system target ev-type ev-data]
-  (log/debug "fire event" {:system system
-                           :target target
-                           :type ev-type
-                           :data ev-data})
-  (async/>!! (-> system ::events :chan)
-             {::type ev-type
-              ::target target
-              ::data ev-data}))
-
-
 (defn add-sub-chan [system ch]
-  (async/admix (-> system ::events :mix) ch))
+  (let [ev-ch (::events-chan system)
+        ev-mix (@mix-for-chan ev-ch)]
+    (async/admix ev-mix ch)))
 
 
 (defn mute-sub-chan [system ch]
