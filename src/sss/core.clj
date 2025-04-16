@@ -1,9 +1,10 @@
 (ns sss.core
   (:require
-   [sss.system :as sys]
+   [sss.db :as db]
    [sss.entity :as ent]
    [sss.signal :as sig]
-   [sss.db :as db]))
+   [sss.sys-ref :refer [*system*]]
+   [sss.system :as sys]))
 
 
 
@@ -38,11 +39,6 @@
 
 (defn halt-system! [system]
   (sys/halt-system! system))
-
-
-(def ^:dynamic *system*
-  "Thread-local system ref to use in context of with-system and other functions in this namespace"
-  nil)
 
 
 (defmacro with-system
