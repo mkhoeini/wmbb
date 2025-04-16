@@ -58,6 +58,11 @@
                 (parse-string true))]
     (map display->entity res)))
 
+(defn get-display [index]
+  (let [res (-> (yabai :query "--displays" "--display" (str index))
+                (parse-string true))]
+    (display->entity res)))
+
 (comment
   (get-displays)
   #_end)
@@ -81,6 +86,11 @@
   (let [res (-> (yabai :query "--spaces")
                 (parse-string true))]
     (map space->entity res)))
+
+(defn get-space [index]
+  (let [res (-> (yabai :query "--spaces" "--space" (str index))
+                (parse-string true))]
+    (space->entity res)))
 
 (comment
   (get-spaces)
