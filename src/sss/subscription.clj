@@ -29,11 +29,21 @@
   (let [txs (for [[sub-name {signal :signal}] subs]
               {::name sub-name
                ::status :enable
-               ::signal signal})]
+               ::signal [::sig/name signal]})]
     (apply db/transact! system txs)))
 
 (comment
   (def ch1 (async/chan 1000000))
   (sig/subscribe! @user/system :wmbb.yabai/events ch1)
   (async/<!! ch1)
+  #_end)
+
+
+(defn get-subscriptions [system]
+  (db/find* system ['?e ::name]))
+
+(comment
+  (->> (get-subscriptions @user/system)
+       (map datascript.core/touch)
+       #_(map #(update % ::signal datascript.core/touch)))
   #_end)

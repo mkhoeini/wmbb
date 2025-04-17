@@ -39,5 +39,13 @@
 
 (defn init! [system signals]
   (->> signals
-       (map-indexed #(hash-map ::name %2))
+       (map #(hash-map ::name %))
        (apply db/transact! system)))
+
+
+(defn get-signals [system]
+  (db/find* system ['?e ::name]))
+
+(comment
+  (get-signals @user/system)
+  #_end)
