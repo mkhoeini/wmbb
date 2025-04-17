@@ -35,11 +35,12 @@
 
 
 (defn create-system [config]
-  (let [{:keys [entities init signals subscriptions reconciler commands tags behaviors]} config
+  (let [{:keys [signals events subscriptions entities init behaviors tags entity-tags commands reconcilers]} config
         schema (ent/to-schema entities)
         system (ig/init (get-config schema signals subscriptions))]
     (sig/init! system signals)
     (sub/init! system subscriptions)
+    (ev/init! system events)
     system))
 
 

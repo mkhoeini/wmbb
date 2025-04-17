@@ -24,7 +24,7 @@
 
 (defn init! [system subs]
   (doseq [[sub-name ch] (::subscriptions-chans system)]
-    (ev/add-sub-chan system ch)
+    (ev/add-sub-chan! system ch)
     (sig/subscribe! system (get-in subs [sub-name :signal]) ch))
   (let [txs (for [[sub-name {signal :signal}] subs]
               {::name sub-name

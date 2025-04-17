@@ -7,11 +7,15 @@
 
 
 (def system-schema
-  {:sss.entity/archetype {:db/valueType :db.type/ref}
-   :sss.signal/name {:db/unique :db.unique/identity}
+  {:sss.signal/name {:db/unique :db.unique/identity}
+
    :sss.subscription/name {:db/unique :db.unique/identity}
    :sss.subscription/status {}
-   :sss.subscription/signal {:db/valueType :db.type/ref}})
+   :sss.subscription/signal {:db/valueType :db.type/ref}
+
+   :sss.event/name {:db/unique :db.unique/identity}
+
+   :sss.entity/archetype {:db/valueType :db.type/ref}})
 
 
 (defmethod ig/init-key ::db [_ {:keys [schema]}]
