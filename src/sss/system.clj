@@ -2,6 +2,7 @@
   (:require
    [clojure.core.async :as async]
    [integrant.core :as ig]
+   [sss.behavior :as bh]
    [sss.db :as db]
    [sss.entity :as ent]
    [sss.event :as ev]
@@ -41,6 +42,8 @@
     (sig/init! system signals)
     (sub/init! system subscriptions)
     (ev/init! system events)
+    (ent/init! system entities init)
+    (bh/init! system behaviors)
     system))
 
 

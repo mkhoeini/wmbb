@@ -17,21 +17,21 @@
   events:
     set of event names
   subscriptions:
-    map from subscription name to a map of {:signal :kw :interesting? (fn [system sig] bool) :to-event (fn [system sig] event)}
+    map from subscription name to a map of {:signal :kw :interesting? (fn [signal] bool) :to-event (fn [signal] event)}
   entities:
     set of entity archetypes
   init:
     initial value for entities. a map from entity name to a set of entity instances
   behaviors:
-    map from behavior name to a map of {:events [:kw] :fn (fn [system event] tx)}
+    map from behavior name to a map of {:events [:kw] :fn (fn [event] tx)}
   tags:
     map from tag name to set of behavior names
   entity-tags:
     map of entity name to set of tag names
   commands:
-    map of command name to a map of {:fn (fn [system cmd])}
+    map of command name to a map of {:fn (fn [cmd])}
   reconcilers:
-    map from reconciler name to a map of {:entity :ent-name :fn (fn [system old-ent new-ent] [{:command}])}
+    map from reconciler name to a map of {:entity :ent-name :fn (fn [old-ent new-ent] [{:command}])}
   "
   [& {:as config}]
   (sys/create-system config))
