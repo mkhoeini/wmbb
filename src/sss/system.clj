@@ -36,15 +36,18 @@
 
 
 (defn create-system [config]
-  (let [{:keys [signals events subscriptions entities init behaviors tags entity-tags commands reconcilers]} config
-        schema (ent/to-schema entities)
-        system (ig/init (get-config schema signals subscriptions))]
-    (sig/init! system signals)
-    (sub/init! system subscriptions)
-    (ev/init! system events)
-    (ent/init! system entities init)
-    (bh/init! system behaviors)
-    system))
+  (-> (ent/to-schema (:entities config))
+      (get-config (:signals config) (:subscriptions config))
+      ig/init))
+
+
+(defn init-system! [system config]
+  (sig/init! system (:signals config))
+  (sub/init! system (:subscriptions config))
+  (ev/init! system (:events config))
+  (ent/init! system (:entities config) (:init config))
+  (bh/init! system (:behaviors config))
+  system)
 
 
 (defn halt-system! [system]

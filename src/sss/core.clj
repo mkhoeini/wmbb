@@ -34,7 +34,9 @@
     map from reconciler name to a map of {:entity :ent-name :fn (fn [old-ent new-ent] [{:command}])}
   "
   [& {:as config}]
-  (sys/create-system config))
+  (-> config
+      sys/create-system
+      (sys/init-system! config)))
 
 
 (defn halt-system! [system]
