@@ -9,7 +9,7 @@
 
 
 (defn create-system
-  "create and initialize a new instance of the system.
+  "Create a new instance of the system. You still need to initialize the system afterwards.
   config is a key-val pairs of these options:
 
   signals:
@@ -34,9 +34,13 @@
     map from reconciler name to a map of {:entity :ent-name :fn (fn [old-ent new-ent] [{:command}])}
   "
   [& {:as config}]
-  (-> config
-      sys/create-system
-      (sys/init-system! config)))
+  (sys/create-system config))
+
+
+(defn init-system!
+  "Initialize the system"
+  [system]
+  (sys/init-system! system))
 
 
 (defn halt-system! [system]

@@ -24,6 +24,7 @@
 
 (comment
   (sss/create-system system-def)
+  (sss/init-system! (sss/create-system system-def))
   (require '[sss.system :as s-sys])
   (s-sys/create-system system-def)
   (tap> (s-sys/get-config system-def))
@@ -33,7 +34,7 @@
 
 
 (defstate system
-  :start (sss/create-system system-def)
+  :start (-> system-def sss/create-system sss/init-system!)
   :stop (sss/halt-system! system))
 
 
