@@ -10,33 +10,24 @@
   (-get-signals [this])
   (-get-signal-chan [this signal])
   (-get-signal-mult [this signal])
-  (-add-signal! [this signal])
   (-send-signal! [this signal data])
   (-subscribe! [this signal chan]))
 
 
-(defmethod ig/init-key ::signals [_ {:keys [buf-fn cfg db-conn]}]
-  (let [chans (atom {})
-        mults (atom {})
-        signals (:signals cfg)
-        state (reify SignalsState
-                (-get-signals [_] signals)
-                (-get-signal-chan [_ sig] (get @chans sig))
-                (-get-signal-mult [_ sig] (get @mults sig))
-                (-add-signal! [_ signal]
-                  (let [ch (async/chan (buf-fn))
-                        m (async/mult ch)]
-                    (swap! chans assoc signal ch)
-                    (swap! mults assoc signal m)))
-                (-send-signal! [_ signal data]
-                  (let [ch (get @chans signal)]
-                    (async/put! ch data)))
-                (-subscribe! [_ signal ch]
-                  (async/tap (get @mults signal) ch)))]
-    (doseq [s signals] (-add-signal! state s))
-    (apply db/transact! db-conn
-           (for [s signals] {::name s}))
-    state))
+(defmethod ig/init-key ::signals [_ {:keys [buf-fn db-conn] {:keys [signals]} :cfg}]
+  (apply db/transact! db-conn
+         (for [s signals] {::name s}))
+  (let [chans (into {} (for [s signals] [s (async/chan (buf-fn))]))
+        mults (into {} (for [s signals :let [ch (chans s)]] [s (async/mult ch)]))]
+    (reify SignalsState
+      (-get-signals [_] signals)
+      (-get-signal-chan [_ sig] (chans sig))
+      (-get-signal-mult [_ sig] (mults sig))
+      (-send-signal! [_ signal data]
+        (let [ch (chans signal)]
+          (async/put! ch data)))
+      (-subscribe! [_ signal ch]
+        (async/tap (mults signal) ch)))))
 
 
 (defmethod ig/halt-key! ::signals [_ sigs]
