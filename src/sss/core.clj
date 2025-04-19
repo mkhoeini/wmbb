@@ -37,12 +37,6 @@
   (sys/create-system config))
 
 
-(defn init-system!
-  "Initialize the system"
-  [system]
-  (sys/init-system! system))
-
-
 (defn halt-system! [system]
   (sys/halt-system! system))
 

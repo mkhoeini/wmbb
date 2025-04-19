@@ -29,15 +29,5 @@
       (assoc ::config config)))
 
 
-(defn init-system! [system]
-  (let [{:keys [signals subscriptions events init entities behaviors]} (::config system)]
-    (sig/init! system signals)
-    (sub/init! system subscriptions)
-    (ev/init! system events)
-    (ent/init! system entities init)
-    (bh/init! system behaviors)
-    system))
-
-
 (defn halt-system! [system]
   (ig/halt! system))
