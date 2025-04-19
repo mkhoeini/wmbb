@@ -26,7 +26,7 @@
   (sss/create-system system-def)
   (require '[sss.system :as s-sys])
   (s-sys/create-system system-def)
-  (tap> (s-sys/get-config system-def))
+  (tap> (s-sys/get-final-config system-def))
   (tap> system-def)
   (tap> entity/entities)
   #_end)

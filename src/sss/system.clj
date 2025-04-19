@@ -18,15 +18,13 @@
    ::sub/subscriptions {:buf-fn #(async/sliding-buffer 20)}})
 
 
-(defn get-config [schema]
-  (assoc-in default-config [::db/db :schema] schema))
+(defn get-final-config [config]
+  (let [schema (ent/to-schema (:entities config))]
+    (assoc-in default-config [::db/db :schema] schema)))
 
 
 (defn create-system [config]
-  (-> (ent/to-schema (:entities config))
-      get-config
-      ig/init
-      (assoc ::config config)))
+  (ig/init (get-final-config config)))
 
 
 (defn halt-system! [system]
