@@ -1,8 +1,7 @@
 (ns sss.db
   (:require
    [datascript.core :as d]
-   [integrant.core :as ig]
-   [sss.log :as log]))
+   [integrant.core :as ig]))
 
 
 
@@ -31,7 +30,7 @@
 
 (defn transact! [system & tx]
   (let [tx-data (d/transact! (::db system) tx)]
-    (log/debug "last transaction" tx-data)
+    #_(tap> ["transaction" tx tx-data])
     tx-data))
 
 
