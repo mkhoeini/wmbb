@@ -15,9 +15,9 @@
   {::cfg/config {}
    ::db/conn {:schema {}}
    ::sig/signals {:buf-fn #(async/sliding-buffer 100)
-                  :cfg (ig/ref ::cfg/config)}
-   ::sub/subscriptions {:buf-fn #(async/sliding-buffer 20)
-                        :cfg (ig/ref ::cfg/config)}
+                  :cfg (ig/ref ::cfg/config)
+                  :db-conn (ig/ref ::db/conn)}
+   ::sub/subscriptions {:buf-fn #(async/sliding-buffer 20)}
    ::ev/events-chan {:buf-fn #(async/sliding-buffer 1000)}})
 
 
