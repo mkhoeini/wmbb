@@ -57,7 +57,7 @@
   "send a signal to the system"
   [sig data]
   {:pre [(some? *system*)]}
-  (sig/send-signal *system* sig data))
+  (sig/send-signal! *system* sig data))
 
 
 (defn get-entity

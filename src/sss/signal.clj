@@ -6,46 +6,48 @@
 
 
 
-(def ^:private chan-to-mult (atom {}))
+(defprotocol SignalsState
+  (get-chans [this])
+  (get-mults [this])
+  (-add-signal! [this signal])
+  (-send-signal! [this signal data])
+  (-subscribe! [this signal chan]))
 
 
-(defmethod ig/init-key ::signals-chans [_ {:keys [signals buf-fn]}]
-  (let [chs (->> signals
-                 (map (fn [s] [s (async/chan (buf-fn))]))
-                 (into {}))]
-    (doseq [ch (vals chs)]
-      (swap! chan-to-mult assoc ch (async/mult ch)))
-    chs))
+(defmethod ig/init-key ::signals [_ {:keys [buf-fn]}]
+  (let [chans (atom {})
+        mults (atom {})]
+    (reify SignalsState
+      (get-chans [_] @chans)
+      (get-mults [_] @mults)
+      (-add-signal! [_ signal]
+        (let [ch (async/chan (buf-fn))
+              m (async/mult ch)]
+          (swap! chans assoc signal ch)
+          (swap! mults assoc signal m)))
+      (-send-signal! [_ signal data]
+        (let [ch (get @chans signal)]
+          (async/put! ch data)))
+      (-subscribe! [_ signal ch]
+        (async/tap (get @mults signal) ch)))))
 
 
-(defmethod ig/halt-key! ::signals-chans [_ chs]
-  (doseq [ch (vals chs)]
-    (async/untap-all (@chan-to-mult ch))
-    (swap! chan-to-mult dissoc ch)
-    (async/close! ch)))
+(defmethod ig/halt-key! ::signals [_ sigs]
+  (doseq [m (get-mults sigs)] (async/untap-all m))
+  (doseq [ch (get-chans sigs)] (async/close! ch)))
 
 
-(defn send-signal [system sig data]
-  (let [ch (get-in system [::signals-chans sig])
-        data-with-meta (vary-meta data assoc :sss/system system)]
-    (async/>!! ch data-with-meta)))
+(defn send-signal! [system signal data]
+  (let [data-with-meta (vary-meta data assoc :sss/system system)]
+    (-send-signal! (::signals system) signal data-with-meta)))
 
 
-(defn subscribe! [system signal ch]
-  (let [sig-chan (get-in system [::signals-chans signal])
-        sig-mult (get @chan-to-mult sig-chan)]
-    (async/tap sig-mult ch)))
+(defn subscribe! [system signal chan]
+  (-subscribe! (::signals system) signal chan))
 
 
 (defn init! [system signals]
-  (->> signals
-       (map #(hash-map ::name %))
-       (apply db/transact! system)))
-
-
-(defn get-signals [system]
-  (db/find* system ['?e ::name]))
-
-(comment
-  (get-signals @user/system)
-  #_end)
+  (doseq [s signals]
+    (-add-signal! (::signals system) s))
+  (apply db/transact! system
+         (for [s signals] {::name s})))
