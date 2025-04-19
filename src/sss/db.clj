@@ -24,22 +24,22 @@
                          :db/valueType :db.type/ref}})
 
 
-(defmethod ig/init-key ::db [_ {:keys [schema]}]
+(defmethod ig/init-key ::conn [_ {:keys [schema]}]
   (d/create-conn (merge system-schema schema)))
 
 
-(defn transact! [system & tx]
-  (let [tx-data (d/transact! (::db system) tx)]
+(defn transact! [conn & tx]
+  (let [tx-data (d/transact! conn tx)]
     #_(tap> ["transaction" tx tx-data])
     tx-data))
 
 
-(defn find1 [system & where]
-  (->> @(::db system)
+(defn find1 [conn & where]
+  (->> @conn
        (d/q {:find '[?e .] :where where})
-       (d/entity @(::db system))))
+       (d/entity @conn)))
 
-(defn find* [system & where]
-  (->> @(::db system)
+(defn find* [conn & where]
+  (->> @conn
        (d/q {:find '[[?e ...]] :where where})
-       (map #(d/entity @(::db system) %))))
+       (map #(d/entity @conn %))))

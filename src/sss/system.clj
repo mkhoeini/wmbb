@@ -13,7 +13,7 @@
 
 (def default-config
   {::cfg/config {}
-   ::db/db {:schema {}}
+   ::db/conn {:schema {}}
    ::sig/signals {:buf-fn #(async/sliding-buffer 100)
                   :cfg (ig/ref ::cfg/config)}
    ::sub/subscriptions {:buf-fn #(async/sliding-buffer 20)
