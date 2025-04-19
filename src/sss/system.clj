@@ -2,7 +2,7 @@
   (:require
    [clojure.core.async :as async]
    [integrant.core :as ig]
-   [sss.behavior :as bh]
+   [sss.config :as cfg]
    [sss.db :as db]
    [sss.entity :as ent]
    [sss.event :as ev]
@@ -12,10 +12,13 @@
 
 
 (def default-config
-  {::ev/events-chan {:buf-fn #(async/sliding-buffer 1000)}
+  {::cfg/config {}
    ::db/db {:schema {}}
-   ::sig/signals {:buf-fn #(async/sliding-buffer 100)}
-   ::sub/subscriptions {:buf-fn #(async/sliding-buffer 20)}})
+   ::sig/signals {:buf-fn #(async/sliding-buffer 100)
+                  :cfg (ig/ref ::cfg/config)}
+   ::sub/subscriptions {:buf-fn #(async/sliding-buffer 20)
+                        :cfg (ig/ref ::cfg/config)}
+   ::ev/events-chan {:buf-fn #(async/sliding-buffer 1000)}})
 
 
 (defn get-final-config [config]
