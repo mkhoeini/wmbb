@@ -7,8 +7,9 @@
 
 
 (defprotocol SignalsState
-  (get-chans [this])
-  (get-mults [this])
+  (-get-signals [this])
+  (-get-signal-chan [this signal])
+  (-get-signal-mult [this signal])
   (-add-signal! [this signal])
   (-send-signal! [this signal data])
   (-subscribe! [this signal chan]))
@@ -18,8 +19,9 @@
   (let [chans (atom {})
         mults (atom {})]
     (reify SignalsState
-      (get-chans [_] @chans)
-      (get-mults [_] @mults)
+      (-get-signals [_] (keys @chans))
+      (-get-signal-chan [_ sig] (get @chans sig))
+      (-get-signal-mult [_ sig] (get @mults sig))
       (-add-signal! [_ signal]
         (let [ch (async/chan (buf-fn))
               m (async/mult ch)]
@@ -33,8 +35,10 @@
 
 
 (defmethod ig/halt-key! ::signals [_ sigs]
-  (doseq [m (get-mults sigs)] (async/untap-all m))
-  (doseq [ch (get-chans sigs)] (async/close! ch)))
+  (doseq [sig (-get-signals sigs) :let [m (-get-signal-mult sigs sig)
+                                        ch (-get-signal-chan sigs sig)]]
+    (async/untap-all m)
+    (async/close! ch)))
 
 
 (defn send-signal! [system signal data]
