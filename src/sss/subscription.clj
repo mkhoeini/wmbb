@@ -9,41 +9,30 @@
 
 
 
-(defmethod ig/init-key ::subscriptions-chans [_ {:keys [subscriptions buf-fn]}]
-  (->> subscriptions
-       (map (fn [[name {:keys [interesting? to-event]}]]
-              [name (async/chan (buf-fn) (comp (filter #(binding [*system* (-> % meta :sss/system)] (interesting? %)))
-                                               (map #(binding [*system* (-> % meta :sss/system)] (to-event %)))))]))
-       (into {})))
+(defprotocol SubsState
+  (-get-subscriptions [this])
+  (-get-subscription-chan [this subscription]))
 
 
-(defmethod ig/halt-key! ::subscriptions-chans [_ chs]
-  (doseq [ch (vals chs)]
+(defmethod ig/init-key ::subscriptions [_ {:keys [buf-fn db-conn signals] {:keys [subscriptions]} :cfg}]
+  (apply db/transact! db-conn
+         (for [[sub-name {signal :signal}] subscriptions]
+            {::name sub-name
+             ::status :enable
+             ::signal [::sig/name signal]}))
+  (let [chans (into {} (for [[s d] subscriptions
+                             :let [{:keys [interesting? to-event]} d
+                                   filt-fn #(binding [*system* (-> % meta :sss/system)] (interesting? %))
+                                   map-fn #(binding [*system* (-> % meta :sss/system)] (to-event %))]]
+                         [s (async/chan (buf-fn) (comp (filter filt-fn) (map map-fn)))]))]
+    (doseq [[sub-name ch] chans :let [signal (get-in subscriptions [sub-name :signal])]]
+      #_(ev/-add-sub-chan! events ch)
+      (sig/-subscribe! signals signal ch))
+    (reify SubsState
+      (-get-subscriptions [_] (keys subscriptions))
+      (-get-subscription-chan [_ sub] (chans sub)))))
+
+
+(defmethod ig/halt-key! ::subscriptions [_ subs]
+  (doseq [s (-get-subscriptions subs) :let [ch (-get-subscription-chan subs s)]]
     (async/close! ch)))
-
-
-(defn init! [system subs]
-  (doseq [[sub-name ch] (::subscriptions-chans system)]
-    (ev/add-sub-chan! system ch)
-    (sig/subscribe! system (get-in subs [sub-name :signal]) ch))
-  (let [txs (for [[sub-name {signal :signal}] subs]
-              {::name sub-name
-               ::status :enable
-               ::signal [::sig/name signal]})]
-    (apply db/transact! system txs)))
-
-(comment
-  (def ch1 (async/chan 1000000))
-  (sig/subscribe! @user/system :wmbb.yabai/events ch1)
-  (async/<!! ch1)
-  #_end)
-
-
-(defn get-subscriptions [system]
-  (db/find* system ['?e ::name]))
-
-(comment
-  (->> (get-subscriptions @user/system)
-       (map datascript.core/touch)
-       #_(map #(update % ::signal datascript.core/touch)))
-  #_end)
