@@ -14,7 +14,7 @@
   (-get-subscription-chan [this subscription]))
 
 
-(defmethod ig/init-key ::subscriptions [_ {:keys [buf-fn db-conn signals] {:keys [subscriptions]} :cfg}]
+(defmethod ig/init-key ::subscriptions [_ {:keys [buf-fn db-conn events signals] {:keys [subscriptions]} :cfg}]
   (apply db/transact! db-conn
          (for [[sub-name {signal :signal}] subscriptions]
             {::name sub-name
@@ -26,7 +26,7 @@
                                    map-fn #(binding [*system* (-> % meta :sss/system)] (to-event %))]]
                          [s (async/chan (buf-fn) (comp (filter filt-fn) (map map-fn)))]))]
     (doseq [[sub-name ch] chans :let [signal (get-in subscriptions [sub-name :signal])]]
-      #_(ev/-add-sub-chan! events ch)
+      (ev/-add-sub-chan! events ch)
       (sig/-subscribe! signals signal ch))
     (reify SubsState
       (-get-subscriptions [_] (keys subscriptions))
