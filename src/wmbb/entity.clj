@@ -1,81 +1,81 @@
 (ns wmbb.entity
- (:require
-  [sss.core :as sss]
-  [wmbb.yabai :as yabai]))
+  (:require
+   [sss.core :as sss]
+   [wmbb.yabai :as yabai]))
 
 
 
 (def entities
-  [(sss/make-entity-archetype ::display
-                              #:wmbb.display{:id [:id]
-                                             :index [:id]
-                                             :uuid []
-                                             :label []
-                                             :x []
-                                             :y []
-                                             :w []
-                                             :h []
-                                             :spaces [:ref :*]
-                                             :has-focus []})
+  [(sss/make-archetype ::display
+                       #:wmbb.display{:id [:id]
+                                      :index [:id]
+                                      :uuid []
+                                      :label []
+                                      :x []
+                                      :y []
+                                      :w []
+                                      :h []
+                                      :spaces [:ref :*]
+                                      :has-focus []})
 
-   (sss/make-entity-archetype ::space
-                              #:wmbb.space{:id [:id]
-                                           :index [:id]
-                                           :uuid []
-                                           :type []
-                                           :label []
-                                           :windows [:ref :*]
-                                           :display [:ref]
-                                           :first-window []
-                                           :last-window []
-                                           :is-native-fullscreen []
-                                           :is-visible []
-                                           :has-focus []})
+   (sss/make-archetype ::space
+                       #:wmbb.space{:id [:id]
+                                    :index [:id]
+                                    :uuid []
+                                    :type []
+                                    :label []
+                                    :windows [:ref :*]
+                                    :display [:ref]
+                                    :first-window []
+                                    :last-window []
+                                    :is-native-fullscreen []
+                                    :is-visible []
+                                    :has-focus []})
 
-   (sss/make-entity-archetype ::window
-                              #:wmbb.window{:id [:id]
-                                            :title []
-                                            :pid []
-                                            :app []
-                                            :x []
-                                            :y []
-                                            :w []
-                                            :h []
-                                            :opacity []
-                                            :stack-index []
-                                            :level []
-                                            :sub-level []
-                                            :layer []
-                                            :sub-layer []
-                                            :role []
-                                            :subrole []
-                                            :split-type []
-                                            :split-child []
-                                            :scratchpad []
-                                            :display [:ref]
-                                            :space [:ref]
-                                            :root-window []
-                                            :is-minimized []
-                                            :is-native-fullscreen []
-                                            :is-sticky []
-                                            :is-floating []
-                                            :is-grabbed []
-                                            :is-hidden []
-                                            :is-visible []
-                                            :has-ax-reference []
-                                            :has-shadow []
-                                            :has-parent-zoom []
-                                            :has-focus []
-                                            :has-fullscreen-zoom []
-                                            :can-resize []
-                                            :can-move []})
+   (sss/make-archetype ::window
+                       #:wmbb.window{:id [:id]
+                                     :title []
+                                     :pid []
+                                     :app []
+                                     :x []
+                                     :y []
+                                     :w []
+                                     :h []
+                                     :opacity []
+                                     :stack-index []
+                                     :level []
+                                     :sub-level []
+                                     :layer []
+                                     :sub-layer []
+                                     :role []
+                                     :subrole []
+                                     :split-type []
+                                     :split-child []
+                                     :scratchpad []
+                                     :display [:ref]
+                                     :space [:ref]
+                                     :root-window []
+                                     :is-minimized []
+                                     :is-native-fullscreen []
+                                     :is-sticky []
+                                     :is-floating []
+                                     :is-grabbed []
+                                     :is-hidden []
+                                     :is-visible []
+                                     :has-ax-reference []
+                                     :has-shadow []
+                                     :has-parent-zoom []
+                                     :has-focus []
+                                     :has-fullscreen-zoom []
+                                     :can-resize []
+                                     :can-move []})
 
-   (sss/make-entity-archetype ::manager-window
-                              #:wmbb.manager.window{:window-id [:id]
-                                                    :ref [:ref]
-                                                    :space [:ref]
-                                                    :next [:ref]
-                                                    :prev [:ref]})])
+   (sss/make-archetype ::manager-window
+                       #:wmbb.manager.window{:window-id [:id]
+                                             :ref [:ref]
+                                             :space [:ref]
+                                             :next [:ref]
+                                             :prev [:ref]})])
 
 
 (defn- disp->seed [disp]

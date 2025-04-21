@@ -1,7 +1,7 @@
 (ns sss.core
   (:require
+   [sss.archetype :as arch]
    [sss.db :as db]
-   [sss.entity :as ent]
    [sss.signal :as sig]
    [sss.sys-ref :refer [*system*]]
    [sss.system :as sys]))
@@ -61,5 +61,5 @@
   (apply db/find1 *system* where))
 
 
-(defn make-entity-archetype [name fields]
-  (ent/make-entity-archetype name fields))
+(defn make-archetype [name fields]
+  (arch/make-archetype name fields))

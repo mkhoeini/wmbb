@@ -2,9 +2,9 @@
   (:require
    [clojure.core.async :as async]
    [integrant.core :as ig]
+   [sss.archetype :as arch]
    [sss.config :as cfg]
    [sss.db :as db]
-   [sss.entity :as ent]
    [sss.event :as ev]
    [sss.signal :as sig]
    [sss.subscription :as sub]))
@@ -24,11 +24,13 @@
                         :cfg (ig/ref ::cfg/config)
                         :db-conn (ig/ref ::db/conn)
                         :events (ig/ref ::ev/events)
-                        :signals (ig/ref ::sig/signals)}})
+                        :signals (ig/ref ::sig/signals)}
+   ::arch/archetypes {:cfg (ig/ref ::cfg/config)
+                      :db-conn (ig/ref ::db/conn)}})
 
 
 (defn get-final-config [config]
-  (let [schema (ent/to-schema (:entities config))]
+  (let [schema (arch/to-schema (:entities config))]
     (assoc-in default-config [::db/conn :schema] schema)))
 
 

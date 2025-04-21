@@ -19,8 +19,8 @@
    :sss.event/chan {}
    :sss.event/mix {}
 
-   :sss.entity-archetype/name {:db/unique :db.unique/identity}
-   :sss.entity-archetype/schema {}
+   :sss.archetype/name {:db/unique :db.unique/identity}
+   :sss.archetype/schema {}
 
    :sss.entity/archetype {:db/valueType :db.type/ref}
 
