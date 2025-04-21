@@ -7,6 +7,8 @@
 
 (def system-schema
   {:sss.signal/name {:db/unique :db.unique/identity}
+   :sss.signal/chan {}
+   :sss.signal/mult {}
 
    :sss.subscription/name {:db/unique :db.unique/identity}
    :sss.subscription/status {}
