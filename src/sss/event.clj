@@ -24,7 +24,7 @@
              ::chan ch
              ::mix mix})
         tx-res (apply db/transact! db-conn tx)]
-    (d/entity db-conn (get-in tx-res [:tempids "chan-mix"]))))
+    (d/entity @db-conn (get-in tx-res [:tempids "chan-mix"]))))
 
 
 (defmethod ig/halt-key! ::events [_ events]

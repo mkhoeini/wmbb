@@ -25,11 +25,11 @@
   (apply merge (map :schema archetypes)))
 
 
-(defmethod ig/init-key ::archetypes [_ {:keys [db-conn] {:keys [entities]} :cfg}]
-  (let [tx (for [{:keys [name schema]} entities]
+(defmethod ig/init-key ::archetypes [_ {:keys [db-conn] {:keys [archetypes]} :cfg}]
+  (let [tx (for [{:keys [name schema]} archetypes]
              {:db/id (str name)
               ::name name
               ::schema schema})
         tx-res (apply db/transact! db-conn tx)]
-    (into {} (for [arch (map :name entities)]
+    (into {} (for [arch (map :name archetypes)]
                [arch (d/entity db-conn (get-in tx-res [:tempids (str arch)]))]))))
