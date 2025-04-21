@@ -5,7 +5,7 @@
 
 
 
-(def entities
+(def archetypes
   [(sss/make-archetype ::display
                        #:wmbb.display{:id [:id]
                                       :index [:id]

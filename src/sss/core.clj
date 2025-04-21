@@ -18,10 +18,10 @@
     set of event names
   subscriptions:
     map from subscription name to a map of {:signal :kw :interesting? (fn [signal] bool) :to-event (fn [signal] event)}
+  archetypes:
+    set of archetypes for entities
   entities:
-    set of entity archetypes
-  init:
-    initial value for entities. a map from entity name to a set of entity instances
+    initial value for entities. a map from archetype name to a set of entity instances
   behaviors:
     map from behavior name to a map of {:events [:kw] :fn (fn [event] tx)}
   tags:

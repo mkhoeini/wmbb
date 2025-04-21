@@ -14,8 +14,8 @@
            {:signals [::yabai/events]
             :events ev/events
             :subscriptions subs/subscriptions
-            :entities entity/entities
-            :init (entity/get-initial-entity-values)
+            :archetypes entity/archetypes
+            :entities (entity/get-initial-entity-values)
             :behaviors {}
             :tags {}
             :entity-tags {}
@@ -28,7 +28,7 @@
   (s-sys/create-system system-def)
   (tap> (s-sys/get-final-config system-def))
   (tap> system-def)
-  (tap> entity/entities)
+  (tap> entity/archetypes)
   #_end)
 
 

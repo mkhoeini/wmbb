@@ -30,7 +30,7 @@
 
 
 (defn get-final-config [config]
-  (let [schema (arch/to-schema (:entities config))]
+  (let [schema (arch/to-schema (:archetypes config))]
     (assoc-in default-config [::db/conn :schema] schema)))
 
 
