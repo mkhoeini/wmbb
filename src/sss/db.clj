@@ -13,6 +13,7 @@
    :sss.subscription/name {:db/unique :db.unique/identity}
    :sss.subscription/status {}
    :sss.subscription/signal {:db/valueType :db.type/ref}
+   :sss.subscription/chan {}
 
    :sss.event/name {:db/unique :db.unique/identity}
 

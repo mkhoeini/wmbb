@@ -5,32 +5,35 @@
    [sss.db :as db]
    [sss.event :as ev]
    [sss.signal :as sig]
-   [sss.sys-ref :refer [*system*]]))
+   [sss.sys-ref :refer [*system*]]
+   [datascript.core :as d]))
 
 
 
-(defprotocol SubsState
-  (-get-subscriptions [this])
-  (-get-subscription-chan [this subscription]))
+(defn -get-subscriptions [subs-state]
+  (keys subs-state))
+
+
+(defn -get-subscription-chan [subs-state subscription]
+  (get-in subs-state [subscription ::chan]))
 
 
 (defmethod ig/init-key ::subscriptions [_ {:keys [buf-fn db-conn events signals] {:keys [subscriptions]} :cfg}]
-  (apply db/transact! db-conn
-         (for [[sub-name {signal :signal}] subscriptions]
-            {::name sub-name
-             ::status :enable
-             ::signal [::sig/name signal]}))
-  (let [chans (into {} (for [[s d] subscriptions
-                             :let [{:keys [interesting? to-event]} d
-                                   filt-fn #(binding [*system* (-> % meta :sss/system)] (interesting? %))
-                                   map-fn #(binding [*system* (-> % meta :sss/system)] (to-event %))]]
-                         [s (async/chan (buf-fn) (comp (filter filt-fn) (map map-fn)))]))]
-    (doseq [[sub-name ch] chans :let [signal (get-in subscriptions [sub-name :signal])]]
+  (let [tx (for [[sub-name {:keys [signal interesting? to-event]}]  subscriptions
+                 :let [filt-fn #(binding [*system* (-> % meta :sss/system)] (interesting? %))
+                       map-fn #(binding [*system* (-> % meta :sss/system)] (to-event %))]]
+             {:db/id (str sub-name)
+              ::name sub-name
+              ::status :enable
+              ::signal [::sig/name signal]
+              ::chan (async/chan (buf-fn) (comp (filter filt-fn) (map map-fn)))})
+        tx-res (apply db/transact! db-conn tx)
+        subs (into {} (for [[s] subscriptions] [s (d/entity db-conn (get-in tx-res [:tempids (str s)]))]))]
+    (doseq [[_ ent] subs :let [signal (::signal ent)
+                               ch (::chan ent)]]
       (ev/-add-sub-chan! events ch)
       (sig/-subscribe! signals signal ch))
-    (reify SubsState
-      (-get-subscriptions [_] (keys subscriptions))
-      (-get-subscription-chan [_ sub] (chans sub)))))
+    subs))
 
 
 (defmethod ig/halt-key! ::subscriptions [_ subs]
