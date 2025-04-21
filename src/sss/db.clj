@@ -16,6 +16,8 @@
    :sss.subscription/chan {}
 
    :sss.event/name {:db/unique :db.unique/identity}
+   :sss.event/chan {}
+   :sss.event/mix {}
 
    :sss.entity-archetype/name {:db/unique :db.unique/identity}
    :sss.entity-archetype/schema {}

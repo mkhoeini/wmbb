@@ -2,23 +2,29 @@
   (:require
    [clojure.core.async :as async]
    [integrant.core :as ig]
-   [sss.db :as db]))
+   [sss.db :as db]
+   [datascript.core :as d]))
 
 
 
-(defprotocol EventState
-  (-get-event-chan [this])
-  (-get-event-mix [this]))
+(defn -get-event-chan [ev-state]
+  (::chan ev-state))
+
+
+(defn -get-event-mix [ev-state]
+  (::mix ev-state))
 
 
 (defmethod ig/init-key ::events [_ {:keys [buf-fn cfg db-conn]}]
-  (apply db/transact! db-conn
-         (for [ev (:events cfg)] {::name ev}))
   (let [ch (async/chan (buf-fn))
-        mix (async/mix ch)]
-    (reify EventState
-      (-get-event-chan [_] ch)
-      (-get-event-mix [_] mix))))
+        mix (async/mix ch)
+        tx (conj
+            (for [ev (:events cfg)] {::name ev})
+            {:db/id "chan-mix"
+             ::chan ch
+             ::mix mix})
+        tx-res (apply db/transact! db-conn tx)]
+    (d/entity db-conn (get-in tx-res [:tempids "chan-mix"]))))
 
 
 (defmethod ig/halt-key! ::events [_ events]
