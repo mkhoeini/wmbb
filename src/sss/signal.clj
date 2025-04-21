@@ -2,30 +2,34 @@
   (:require
     [integrant.core :as ig]
     [clojure.core.async :as async]
-    [sss.db :as db]))
+    [sss.db :as db]
+    [datascript.core :as d]))
 
 
 
 (defmethod ig/init-key ::signals [_ {:keys [buf-fn db-conn] {:keys [signals]} :cfg}]
-  (apply db/transact! db-conn
-         (for [s signals] {::name s}))
-  (let [chans (into {} (for [s signals] [s (async/chan (buf-fn))]))
-        mults (into {} (for [s signals :let [ch (chans s)]] [s (async/mult ch)]))]
-    {:signals signals
-     :chans chans
-     :mults mults}))
+  (let [tx (for [s signals
+                 :let [ch (async/chan (buf-fn))
+                       m (async/mult ch)]]
+             {:db/id (str s)
+              ::name s
+              ::chan ch
+              ::mult m})
+        tx-res (apply db/transact! db-conn tx)]
+    (into {} (for [[k ent] (:tempids tx-res) :when (not= k :db/current-tx)]
+               [(keyword (subs k 1)) (d/entity @db-conn ent)]))))
 
 
 (defn -get-signals [events-state]
-  (:signals events-state))
+  (keys events-state))
 
 
 (defn -get-signal-chan [events-state signal]
-  (get-in events-state [:chans signal]))
+  (get-in events-state [signal ::chan]))
 
 
 (defn -get-signal-mult [events-state signal]
-  (get-in events-state [:mults signal]))
+  (get-in events-state [signal ::mult]))
 
 
 (defn -send-signal! [events-state signal data]
