@@ -29,7 +29,7 @@
 
 (defn get-final-config [config]
   (let [schema (ent/to-schema (:entities config))]
-    (assoc-in default-config [::db/db :schema] schema)))
+    (assoc-in default-config [::db/conn :schema] schema)))
 
 
 (defn create-system [config]
