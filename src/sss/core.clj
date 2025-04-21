@@ -4,7 +4,8 @@
    [sss.db :as db]
    [sss.signal :as sig]
    [sss.sys-ref :refer [*system*]]
-   [sss.system :as sys]))
+   [sss.system :as sys]
+   [sss.event :as ev]))
 
 
 
@@ -63,3 +64,7 @@
 
 (defn make-archetype [name fields]
   (arch/make-archetype name fields))
+
+
+(defn make-event [name target data]
+  (ev/make-event name target data))

@@ -7,7 +7,7 @@
 
 
 
-(defn -get-event-chan [ev-state]
+(defn get-event-chan [ev-state]
   (::chan ev-state))
 
 
@@ -29,8 +29,14 @@
 
 (defmethod ig/halt-key! ::events [_ events]
   (async/unmix-all (-get-event-mix events))
-  (async/close! (-get-event-chan events)))
+  (async/close! (get-event-chan events)))
 
 
 (defn -add-sub-chan! [events ch]
   (async/admix (-get-event-mix events) ch))
+
+
+(defn make-event [name target data]
+  {::name name
+   ::target target
+   ::data data})

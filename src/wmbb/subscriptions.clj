@@ -9,25 +9,19 @@
 (defn window-signal-to-event [signal event-name]
   (let [win-id (:yabai.window/id signal)
         win (sss/get-entity ['?e :wmbb.window/id win-id])]
-    #:sss.event{:name event-name
-                :target win
-                :data (yabai/get-window win-id)}))
+    (sss/make-event event-name win (yabai/get-window win-id))))
 
 
 (defn space-signal-to-event [signal event-name]
   (let [spc-index (:yabai.space/id signal)
         spc (sss/get-entity ['?e :wmbb.space/index spc-index])]
-    #:sss.event{:name event-name
-                :target spc
-                :data (yabai/get-space spc-index)}))
+    (sss/make-event event-name spc (yabai/get-space spc-index))))
 
 
 (defn display-signal-to-event [signal event-name]
   (let [disp-index (:yabai.display/id signal)
         disp (sss/get-entity ['?e :wmbb.display/index disp-index])]
-    #:sss.event{:name event-name
-                :target disp
-                :data (yabai/get-display disp-index)}))
+    (sss/make-event event-name disp (yabai/get-display disp-index))))
 
 
 (defn to-event [signal event-name]
