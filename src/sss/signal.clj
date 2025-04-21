@@ -16,8 +16,8 @@
               ::chan ch
               ::mult m})
         tx-res (apply db/transact! db-conn tx)]
-    (into {} (for [[k ent] (:tempids tx-res) :when (not= k :db/current-tx)]
-               [(keyword (subs k 1)) (d/entity @db-conn ent)]))))
+    (into {} (for [s signals]
+               [s (d/entity @db-conn (get-in tx-res [:tempids (str s)]))]))))
 
 
 (defn -get-signals [events-state]
