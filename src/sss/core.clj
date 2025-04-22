@@ -59,7 +59,7 @@
   "get an entity instance ref by running a query"
   [& where]
   {:pre [(some? *system*)]}
-  (apply db/find1 *system* where))
+  (apply db/find1 (::db/conn *system*) where))
 
 
 (defn make-archetype [name fields]

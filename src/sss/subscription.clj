@@ -1,12 +1,13 @@
 (ns sss.subscription
   (:require
    [clojure.core.async :as async]
+   [datascript.core :as d]
    [integrant.core :as ig]
    [sss.db :as db]
    [sss.event :as ev]
    [sss.signal :as sig]
    [sss.sys-ref :refer [*system*]]
-   [datascript.core :as d]))
+   [sss.utils :refer [spy]]))
 
 
 
@@ -26,7 +27,7 @@
               ::name sub-name
               ::status :enable
               ::signal [::sig/name signal]
-              ::chan (async/chan (buf-fn) (comp (filter filt-fn) (map map-fn)))})
+              ::chan (async/chan (buf-fn) (comp (filter filt-fn) (map map-fn) #_(map #(spy (str sub-name) %))))})
         tx-res (apply db/transact! db-conn tx)
         subs (into {} (for [s (keys subscriptions)]
                         [s (d/entity @db-conn (get-in tx-res [:tempids (str s)]))]))]
