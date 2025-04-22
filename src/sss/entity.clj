@@ -1,7 +1,6 @@
 (ns sss.entity
   (:require
     [integrant.core :as ig]
-    [sss.archetype :as arch]
     [sss.db :as db]
     [sss.event :as ev]
     [datascript.core :as d]
@@ -15,8 +14,8 @@
              (assoc ent ::archetype (get-in archetypes [arch :db/id])))
         tx-res (apply db/transact! db-conn tx)]
     (into {} (for [[arch ents] entities]
-               [arch (into [] (for [[_ i] (map vector ents (range))]
-                                (d/entity @db-conn (get-in tx-res [:tempids (str arch i)]))))]))))
+               [arch (into [] (for [ent ents]
+                                (d/entity @db-conn (get-in tx-res [:tempids (:db/id ent)]))))]))))
 
 
 (defmethod ig/init-key ::event-consumer [_ {:keys [events]}]
