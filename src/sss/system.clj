@@ -5,6 +5,7 @@
    [sss.archetype :as arch]
    [sss.config :as cfg]
    [sss.db :as db]
+   [sss.entity :as ent]
    [sss.event :as ev]
    [sss.signal :as sig]
    [sss.subscription :as sub]))
@@ -26,7 +27,11 @@
                         :events (ig/ref ::ev/events)
                         :signals (ig/ref ::sig/signals)}
    ::arch/archetypes {:cfg (ig/ref ::cfg/config)
-                      :db-conn (ig/ref ::db/conn)}})
+                      :db-conn (ig/ref ::db/conn)}
+   ::ent/init {:archetypes (ig/ref ::arch/archetypes)
+               :cfg (ig/ref ::cfg/config)
+               :db-conn (ig/ref ::db/conn)}
+   ::ent/event-consumer {:events (ig/ref ::ev/events)}})
 
 
 (defn get-final-config [config]

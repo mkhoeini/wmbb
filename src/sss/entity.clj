@@ -1,47 +1,27 @@
 (ns sss.entity
   (:require
+    [integrant.core :as ig]
+    [sss.archetype :as arch]
     [sss.db :as db]
     [sss.event :as ev]
+    [datascript.core :as d]
     [clojure.core.async :as async]))
 
 
 
-(defn- attrs [a]
-  (->> a
-       (map #(case %
-               :id [:db/unique :db.unique/identity]
-               :ref [:db/valueType :db.type/ref]
-               :* [:db/cardinality :db.cardinality/many]))
-       (into {})))
+(defmethod ig/init-key ::init [_ {:keys [archetypes db-conn] {:keys [entities]} :cfg}]
+  (let [tx (for [[arch ents] entities
+                 ent ents]
+             (assoc ent ::archetype (get-in archetypes [arch :db/id])))
+        tx-res (apply db/transact! db-conn tx)]
+    (into {} (for [[arch ents] entities]
+               [arch (into [] (for [[_ i] (map vector ents (range))]
+                                (d/entity @db-conn (get-in tx-res [:tempids (str arch i)]))))]))))
 
 
-(defn make-entity-archetype [name fields]
-  (let [schema (->> fields
-                    (map (fn [[attr-name attr-val]]
-                           [attr-name (attrs attr-val)]))
-                    (into {}))]
-    {::name name
-     ::schema schema}))
-
-
-(defn to-schema [entities]
-  (->> entities (map ::schema) (apply merge)))
-
-
-(defn make-event-loop! [system]
+(defmethod ig/init-key ::event-consumer [_ {:keys [events]}]
   (async/thread
     (loop []
-      (when-let [{::ev/keys [name target data]} (async/<! (::ev/events-chan system))]
+      (when-let [{::ev/keys [name target data]} (async/<!! (ev/get-event-chan events))]
+        (tap> ["got event" name target data])
         (recur)))))
-
-
-(defn init! [system entities init]
-  (let [a-tx (for [{::keys [name schema]} entities]
-               {:db/id (str name)
-                :sss.entity-archetype/name name
-                :sss.entity-archetype/schema schema})
-        i-tx (for [[name instances] init
-                   instance instances]
-               (assoc instance ::archetype (str name)))]
-    (apply db/transact! system (concat a-tx i-tx)))
-  (make-event-loop! system))
