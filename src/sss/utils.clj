@@ -2,7 +2,7 @@
 
 
 
-(defmacro spy [x]
+(defmacro spy [title x]
   `(let [x# ~x]
-     (tap> x#)
+     (tap> [~title x#])
      x#))

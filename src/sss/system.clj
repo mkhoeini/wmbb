@@ -43,7 +43,7 @@
 
 
 (defn create-system [config]
-  (spy (ig/init (get-final-config config))))
+  (spy "create-system" (ig/init (get-final-config config))))
 
 
 (defn halt-system! [system]
