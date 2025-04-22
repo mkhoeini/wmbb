@@ -29,7 +29,7 @@
               ::chan (async/chan (buf-fn) (comp (filter filt-fn) (map map-fn)))})
         tx-res (apply db/transact! db-conn tx)
         subs (into {} (for [s (keys subscriptions)]
-                        [s (d/entity db-conn (get-in tx-res [:tempids (str s)]))]))]
+                        [s (d/entity @db-conn (get-in tx-res [:tempids (str s)]))]))]
     (doseq [[_ ent] subs :let [signal (::signal ent)
                                ch (::chan ent)]]
       (ev/-add-sub-chan! events ch)

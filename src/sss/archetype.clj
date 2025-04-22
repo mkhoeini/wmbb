@@ -32,4 +32,4 @@
               ::schema schema})
         tx-res (apply db/transact! db-conn tx)]
     (into {} (for [arch (map :name archetypes)]
-               [arch (d/entity db-conn (get-in tx-res [:tempids (str arch)]))]))))
+               [arch (d/entity @db-conn (get-in tx-res [:tempids (str arch)]))]))))
