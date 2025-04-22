@@ -24,7 +24,7 @@
   entities:
     initial value for entities. a map from archetype name to a set of entity instances
   behaviors:
-    map from behavior name to a map of {:events [:kw] :fn (fn [event] tx)}
+    map from behavior name to a map of {:events [:kw] :reaction (fn [event] tx)}
   tags:
     map from tag name to set of behavior names
   entity-tags:

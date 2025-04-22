@@ -1,17 +1,18 @@
 (ns sss.behavior
   (:require
     [sss.db :as db]
-    [sss.event :as ev]))
+    [sss.event :as ev]
+    [integrant.core :as ig]
+    [datascript.core :as d]))
 
 
 
-(def behavior-fn (atom {}))
-
-
-(defn init! [system behaviors]
+(defmethod ig/init-key ::behaviors [_ {:keys [db-conn] _dummy :events {:keys [behaviors]} :cfg}]
   (let [tx (for [[bname bdef] behaviors]
-             {::name bname
-              ::events (for [ev (:events bdef)] [::ev/name ev])})]
-    (apply db/transact! system tx))
-  (doseq [[bname {bfn :fn}] behaviors]
-    (swap! behavior-fn assoc-in [system bname] bfn)))
+             {:db/id (str bname)
+              ::name bname
+              ::events (for [ev (:events bdef)] [::ev/name ev])
+              ::reaction (:reaction bdef)})
+        tx-res (apply db/transact! db-conn tx)]
+    (into {} (for [bname (keys behaviors)]
+               [bname (d/entity @db-conn (get-in tx-res [:tempids (str bname)]))]))))

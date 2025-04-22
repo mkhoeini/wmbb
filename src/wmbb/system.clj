@@ -2,10 +2,11 @@
   (:require
    [mount.core :as mount :refer [defstate]]
    [sss.core :as sss]
+   [wmbb.behaviors :as be]
    [wmbb.entity :as entity]
-   [wmbb.yabai :as yabai]
+   [wmbb.event :as ev]
    [wmbb.subscriptions :as subs]
-   [wmbb.event :as ev]))
+   [wmbb.yabai :as yabai]))
 
 
 
@@ -16,7 +17,7 @@
             :subscriptions subs/subscriptions
             :archetypes entity/archetypes
             :entities (entity/get-initial-entity-values)
-            :behaviors {}
+            :behaviors be/behaviors
             :tags {}
             :entity-tags {}
             :commands {}

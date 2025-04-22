@@ -26,7 +26,8 @@
 
    :sss.behavior/name {:db/unique :db.unique/identity}
    :sss.behavior/events {:db/cardinality :db.cardinality/many
-                         :db/valueType :db.type/ref}})
+                         :db/valueType :db.type/ref}
+   :sss.behavior/reaction {}})
 
 
 (defmethod ig/init-key ::conn [_ {:keys [schema]}]
