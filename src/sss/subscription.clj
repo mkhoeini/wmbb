@@ -33,7 +33,7 @@
     (doseq [[_ ent] subs :let [signal (::signal ent)
                                ch (::chan ent)]]
       (ev/-add-sub-chan! events ch)
-      (sig/-subscribe! signals signal ch))
+      (sig/subscribe! signals signal ch))
     subs))
 
 

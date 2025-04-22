@@ -20,24 +20,25 @@
                [s (d/entity @db-conn (get-in tx-res [:tempids (str s)]))]))))
 
 
-(defn -get-signals [events-state]
+(defn- -get-signals [events-state]
   (keys events-state))
 
 
-(defn -get-signal-chan [events-state signal]
+(defn- -get-signal-chan [events-state signal]
   (get-in events-state [signal ::chan]))
 
 
-(defn -get-signal-mult [events-state signal]
+(defn- -get-signal-mult [events-state signal]
   (get-in events-state [signal ::mult]))
 
 
-(defn -send-signal! [events-state signal data]
+(defn- -send-signal! [events-state signal data]
+  #_(tap> ["sent signal" (-get-signal-chan events-state signal) events-state signal])
   (async/put! (-get-signal-chan events-state signal) data))
 
 
-(defn -subscribe! [events-state signal chan]
-  (async/tap (-get-signal-mult events-state signal) chan))
+(defn subscribe! [events-state signal chan]
+  #_(async/tap (-get-signal-mult events-state signal) chan))
 
 
 (defmethod ig/halt-key! ::signals [_ sigs]
@@ -48,5 +49,6 @@
 
 
 (defn send-signal! [system signal data]
+  #_(tap> ["got event" system signal data])
   (let [data-with-meta (vary-meta data assoc :sss/system system)]
     (-send-signal! (::signals system) signal data-with-meta)))
