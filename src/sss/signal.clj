@@ -38,7 +38,7 @@
 
 
 (defn subscribe! [events-state signal chan]
-  #_(async/tap (-get-signal-mult events-state signal) chan))
+  (async/tap (-get-signal-mult events-state signal) chan))
 
 
 (defmethod ig/halt-key! ::signals [_ sigs]

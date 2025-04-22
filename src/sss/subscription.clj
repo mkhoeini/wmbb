@@ -30,7 +30,7 @@
         tx-res (apply db/transact! db-conn tx)
         subs (into {} (for [s (keys subscriptions)]
                         [s (d/entity @db-conn (get-in tx-res [:tempids (str s)]))]))]
-    (doseq [[_ ent] subs :let [signal (::signal ent)
+    (doseq [[_ ent] subs :let [signal (get-in ent [::signal ::sig/name])
                                ch (::chan ent)]]
       (ev/-add-sub-chan! events ch)
       (sig/subscribe! signals signal ch))
