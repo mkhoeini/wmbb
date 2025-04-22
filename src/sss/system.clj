@@ -8,7 +8,8 @@
    [sss.entity :as ent]
    [sss.event :as ev]
    [sss.signal :as sig]
-   [sss.subscription :as sub]))
+   [sss.subscription :as sub]
+   [sss.utils :refer [spy]]))
 
 
 
@@ -40,7 +41,7 @@
 
 
 (defn create-system [config]
-  (ig/init (get-final-config config)))
+  (spy (ig/init (get-final-config config))))
 
 
 (defn halt-system! [system]
