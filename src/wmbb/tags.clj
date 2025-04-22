@@ -1,8 +1,8 @@
-(ns wmbb.tags
-  (:require
-   [wmbb.behaviors :as be]))
+(ns wmbb.tags)
 
 
 
 (def tags
-  {::window [::be/center-window]})
+  [::window
+   ::space
+   ::display])

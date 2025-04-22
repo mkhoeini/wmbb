@@ -29,18 +29,19 @@
                         :db-conn (ig/ref ::db/conn)
                         :events (ig/ref ::ev/events)
                         :signals (ig/ref ::sig/signals)}
+   ::tag/tags {:cfg (ig/ref ::cfg/config)
+               :db-conn (ig/ref ::db/conn)}
    ::arch/archetypes {:cfg (ig/ref ::cfg/config)
-                      :db-conn (ig/ref ::db/conn)}
+                      :db-conn (ig/ref ::db/conn)
+                      :tags (ig/ref ::tag/tags)}
    ::ent/init {:archetypes (ig/ref ::arch/archetypes)
                :cfg (ig/ref ::cfg/config)
                :db-conn (ig/ref ::db/conn)}
    ::ent/event-consumer {:events (ig/ref ::ev/events)}
    ::be/behaviors {:cfg (ig/ref ::cfg/config)
                    :db-conn (ig/ref ::db/conn)
-                   :events (ig/ref ::ev/events)}
-   ::tag/tags {:cfg (ig/ref ::cfg/config)
-               :db-conn (ig/ref ::db/conn)
-               :behaviors (ig/ref ::be/behaviors)}})
+                   :events (ig/ref ::ev/events)
+                   :tags (ig/ref ::tag/tags)}})
 
 
 (defn get-final-config [config]

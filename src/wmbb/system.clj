@@ -16,11 +16,10 @@
            {:signals [::yabai/events]
             :events ev/events
             :subscriptions subs/subscriptions
+            :tags tag/tags
             :archetypes entity/archetypes
             :entities (entity/get-initial-entity-values)
             :behaviors be/behaviors
-            :tags tag/tags
-            :entity-tags {}
             :commands {}
             :reconcilers {}}))
 

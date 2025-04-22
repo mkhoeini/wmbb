@@ -20,6 +20,8 @@
    :sss.event/mix {}
 
    :sss.archetype/name {:db/unique :db.unique/identity}
+   :sss.archetype/tags {:db/cardinality :db.cardinality/many
+                        :db/valueType :db.type/ref}
    :sss.archetype/schema {}
 
    :sss.entity/archetype {:db/valueType :db.type/ref}
@@ -27,11 +29,11 @@
    :sss.behavior/name {:db/unique :db.unique/identity}
    :sss.behavior/events {:db/cardinality :db.cardinality/many
                          :db/valueType :db.type/ref}
+   :sss.behavior/tags {:db/cardinality :db.cardinality/many
+                       :db/valueType :db.type/ref}
    :sss.behavior/reaction {}
 
-   :sss.tag/name {:db/unique :db.unique/identity}
-   :sss.tag/behaviors {:db/cardinality :db.cardinality/many
-                       :db/valueType :db.type/ref}})
+   :sss.tag/name {:db/unique :db.unique/identity}})
 
 
 (defmethod ig/init-key ::conn [_ {:keys [schema]}]

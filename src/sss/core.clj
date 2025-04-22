@@ -19,16 +19,14 @@
     set of event names
   subscriptions:
     map from subscription name to a map of {:signal :kw :interesting? (fn [signal] bool) :to-event (fn [signal] event)}
+  tags:
+    set of tag names
   archetypes:
-    set of archetypes for entities
+    set of archetype maps ({:name :kw :tags [:kw] :schema {}}) for entities
   entities:
     initial value for entities. a map from archetype name to a set of entity instances
   behaviors:
-    map from behavior name to a map of {:events [:kw] :reaction (fn [event] tx)}
-  tags:
-    map from tag name to set of behavior names
-  entity-tags:
-    map of entity name to set of tag names
+    map from behavior name to a map of {:events [:kw] :tags [:kw] :reaction (fn [event] tx)}
   commands:
     map of command name to a map of {:fn (fn [cmd])}
   reconcilers:
@@ -62,8 +60,8 @@
   (apply db/find1 (::db/conn *system*) where))
 
 
-(defn make-archetype [name fields]
-  (arch/make-archetype name fields))
+(defn make-archetype [name tags fields]
+  (arch/make-archetype name tags fields))
 
 
 (defn make-event [name target data]

@@ -1,12 +1,14 @@
 (ns wmbb.entity
   (:require
    [sss.core :as sss]
+   [wmbb.tags :as tag]
    [wmbb.yabai :as yabai]))
 
 
 
 (def archetypes
   [(sss/make-archetype ::display
+                       [::tag/display]
                        #:wmbb.display{:id [:id]
                                       :index [:id]
                                       :uuid []
@@ -19,6 +21,7 @@
                                       :has-focus []})
 
    (sss/make-archetype ::space
+                       [::tag/space]
                        #:wmbb.space{:id [:id]
                                     :index [:id]
                                     :uuid []
@@ -33,6 +36,7 @@
                                     :has-focus []})
 
    (sss/make-archetype ::window
+                       [::tag/window]
                        #:wmbb.window{:id [:id]
                                      :title []
                                      :pid []
@@ -71,6 +75,7 @@
                                      :can-move []})
 
    (sss/make-archetype ::manager-window
+                       []
                        #:wmbb.manager.window{:window-id [:id]
                                              :ref [:ref]
                                              :space [:ref]
