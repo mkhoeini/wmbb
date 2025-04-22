@@ -10,6 +10,7 @@
    [sss.event :as ev]
    [sss.signal :as sig]
    [sss.subscription :as sub]
+   [sss.tag :as tag]
    [sss.utils :refer [spy]]))
 
 
@@ -36,7 +37,10 @@
    ::ent/event-consumer {:events (ig/ref ::ev/events)}
    ::be/behaviors {:cfg (ig/ref ::cfg/config)
                    :db-conn (ig/ref ::db/conn)
-                   :events (ig/ref ::ev/events)}})
+                   :events (ig/ref ::ev/events)}
+   ::tag/tags {:cfg (ig/ref ::cfg/config)
+               :db-conn (ig/ref ::db/conn)
+               :behaviors (ig/ref ::be/behaviors)}})
 
 
 (defn get-final-config [config]

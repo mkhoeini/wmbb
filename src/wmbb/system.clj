@@ -6,6 +6,7 @@
    [wmbb.entity :as entity]
    [wmbb.event :as ev]
    [wmbb.subscriptions :as subs]
+   [wmbb.tags :as tag]
    [wmbb.yabai :as yabai]))
 
 
@@ -18,7 +19,7 @@
             :archetypes entity/archetypes
             :entities (entity/get-initial-entity-values)
             :behaviors be/behaviors
-            :tags {}
+            :tags tag/tags
             :entity-tags {}
             :commands {}
             :reconcilers {}}))
