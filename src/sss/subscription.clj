@@ -32,7 +32,7 @@
                         [s (d/entity @db-conn (get-in tx-res [:tempids (str s)]))]))]
     (doseq [[_ ent] subs :let [signal (get-in ent [::signal ::sig/name])
                                ch (::chan ent)]]
-      (ev/-add-sub-chan! events ch)
+      (ev/add-sub-chan! events ch)
       (sig/subscribe! signals signal ch))
     subs))
 

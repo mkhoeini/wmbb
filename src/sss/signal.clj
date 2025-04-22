@@ -1,15 +1,16 @@
 (ns sss.signal
   (:require
-    [integrant.core :as ig]
-    [clojure.core.async :as async]
-    [sss.db :as db]
-    [datascript.core :as d]))
+   [clojure.core.async :as async]
+   [datascript.core :as d]
+   [integrant.core :as ig]
+   [sss.db :as db]
+   [sss.utils :refer [spy]]))
 
 
 
 (defmethod ig/init-key ::signals [_ {:keys [buf-fn db-conn] {:keys [signals]} :cfg}]
   (let [tx (for [s signals
-                 :let [ch (async/chan (buf-fn))
+                 :let [ch (async/chan (buf-fn) #_(map #(spy "signal chan transducer" %)))
                        m (async/mult ch)]]
              {:db/id (str s)
               ::name s
@@ -33,8 +34,8 @@
 
 
 (defn- -send-signal! [events-state signal data]
-  #_(tap> ["sent signal" (-get-signal-chan events-state signal) events-state signal])
-  (async/put! (-get-signal-chan events-state signal) data))
+  (async/put! (-get-signal-chan events-state signal) data)
+  #_(tap> ["sent signal" (-get-signal-chan events-state signal) events-state signal]))
 
 
 (defn subscribe! [events-state signal chan]

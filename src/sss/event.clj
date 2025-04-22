@@ -32,7 +32,7 @@
   (async/close! (get-event-chan events)))
 
 
-(defn -add-sub-chan! [events ch]
+(defn add-sub-chan! [events ch]
   (async/admix (-get-event-mix events) ch))
 
 
