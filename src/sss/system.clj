@@ -16,7 +16,8 @@
 
 
 (def default-config
-  {::cfg/config {}
+  {::cfg/config {:events [::ev/entity-created ::ev/entity-deleted]
+                 :tags [::tag/entity]}
    ::db/conn {:schema {}}
    ::sig/signals {:buf-fn #(async/sliding-buffer 100)
                   :cfg (ig/ref ::cfg/config)
@@ -46,9 +47,10 @@
 
 
 (defn get-final-config [config]
-  (let [schema (arch/to-schema (:archetypes config))]
+  (let [schema (arch/to-schema (:archetypes config))
+        new-config (merge-with into (::cfg/config default-config) config)]
     (-> default-config
-        (assoc-in [::cfg/config] config)
+        (assoc-in [::cfg/config] new-config)
         (assoc-in [::db/conn :schema] schema))))
 
 

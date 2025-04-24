@@ -16,11 +16,11 @@
   signals:
     set of signal names
   events:
-    set of event names
+    set of event names. built-in events are: [:sss.event/entity-created :sss.event/entity-deleted]
   subscriptions:
     map from subscription name to a map of {:signal :kw :interesting? (fn [signal] bool) :to-event (fn [signal] event)}
   tags:
-    set of tag names
+    set of tag names. built-in tags are: [:sss.tag/entity]
   archetypes:
     set of archetype maps ({:name :kw :tags [:kw] :schema {}}) for entities
   entities:
