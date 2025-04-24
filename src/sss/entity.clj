@@ -9,7 +9,7 @@
 
 
 
-(defmethod ig/init-key ::init [_ {:keys [archetypes db-conn] {:keys [entities]} :cfg}]
+(defmethod ig/init-key ::init [_ {:keys [archetypes db-conn] {:keys [entities] _dummy :ev-loop} :cfg}]
   (let [tx (for [[arch ents] entities
                  ent ents]
              (assoc ent ::archetype (get-in archetypes [arch :db/id])))
@@ -33,7 +33,7 @@
     (set behaviors)))
 
 
-(defmethod ig/init-key ::event-consumer [_ {:keys [db-conn events]}]
+(defmethod ig/init-key ::event-consumer [_ {:keys [db-conn events] _dummy :behaviors}]
   (async/thread
     (loop []
       (when-let [event (async/<!! (ev/get-event-chan events))]
