@@ -19,7 +19,7 @@
   (let [schema (into {} (for [[attr-name attr-val] fields]
                           [attr-name (attrs attr-val)]))]
     {:name name
-     :tags tags
+     :tags (into [::tag/entity] tags)
      :schema schema}))
 
 

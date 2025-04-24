@@ -23,6 +23,7 @@
     set of tag names. built-in tags are: [:sss.tag/entity]
   archetypes:
     set of archetype maps ({:name :kw :tags [:kw] :schema {}}) for entities
+    all archetypes will get the :sss.tag/entity tag by default
   entities:
     initial value for entities. a map from archetype name to a set of entity instances
   behaviors:
