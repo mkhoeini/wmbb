@@ -9,4 +9,5 @@
   {::center-window {:events [::ev/window-focused]
                     :tags [::tag/window]
                     :reaction (fn center-window [event]
-                                (tap> ["behavior center window" event]))}})
+                                [{:db/id (get-in event [:target :db/id])
+                                  :center true}])}})

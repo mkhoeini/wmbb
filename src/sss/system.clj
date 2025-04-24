@@ -37,7 +37,8 @@
    ::ent/init {:archetypes (ig/ref ::arch/archetypes)
                :cfg (ig/ref ::cfg/config)
                :db-conn (ig/ref ::db/conn)}
-   ::ent/event-consumer {:events (ig/ref ::ev/events)}
+   ::ent/event-consumer {:db-conn (ig/ref ::db/conn)
+                         :events (ig/ref ::ev/events)}
    ::be/behaviors {:cfg (ig/ref ::cfg/config)
                    :db-conn (ig/ref ::db/conn)
                    :events (ig/ref ::ev/events)

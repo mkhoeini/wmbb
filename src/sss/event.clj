@@ -37,6 +37,6 @@
 
 
 (defn make-event [name target data]
-  {::name name
-   ::target target
-   ::data data})
+  {:name name
+   :target target
+   :data data})

@@ -22,7 +22,8 @@
 (defmethod ig/init-key ::subscriptions [_ {:keys [buf-fn db-conn events signals] {:keys [subscriptions]} :cfg}]
   (let [tx (for [[sub-name {:keys [signal interesting? to-event]}]  subscriptions
                  :let [filt-fn #(binding [*system* (-> % meta :sss/system)] (interesting? %))
-                       map-fn #(binding [*system* (-> % meta :sss/system)] (to-event %))]]
+                       map-fn #(binding [*system* (-> % meta :sss/system)]
+                                 (vary-meta (to-event %) assoc :sss/system *system*))]]
              {:db/id (str sub-name)
               ::name sub-name
               ::status :enable
