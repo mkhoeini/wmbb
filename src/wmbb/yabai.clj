@@ -42,16 +42,16 @@
 
 
 (defn- display->entity [{:keys [id uuid index label frame spaces has-focus]}]
-  #:wmbb.display{:id id
-                 :uuid uuid
-                 :index index
-                 :label label
-                 :has-focus has-focus
-                 :spaces (map #(do [:wmbb.space/index %]) spaces)
-                 :x (:x frame)
-                 :y (:y frame)
-                 :w (:w frame)
-                 :h (:h frame)})
+  {:id id
+   :uuid uuid
+   :index index
+   :label label
+   :has-focus has-focus
+   :spaces spaces ;(map #(do [:wmbb.space/index %]) spaces)
+   :x (:x frame)
+   :y (:y frame)
+   :w (:w frame)
+   :h (:h frame)})
 
 (defn get-displays []
   (let [res (-> (yabai :query "--displays")
@@ -69,18 +69,18 @@
 
 
 (defn- space->entity [{:keys [windows index is-native-fullscreen type label id is-visible has-focus display last-window uuid first-window]}]
-  #:wmbb.space{:id id
-               :uuid uuid
-               :label label
-               :type type
-               :index index
-               :is-native-fullscreen is-native-fullscreen
-               :is-visible is-visible
-               :has-focus has-focus
-               :windows (map #(do [:wmbb.window/id %]) windows)
-               :display [:wmbb.display/index display]
-               :first-window first-window
-               :last-window last-window})
+  {:id id
+   :uuid uuid
+   :label label
+   :type type
+   :index index
+   :is-native-fullscreen is-native-fullscreen
+   :is-visible is-visible
+   :has-focus has-focus
+   :windows windows ;(map #(do [:wmbb.window/id %]) windows)
+   :display display ;[:wmbb.display/index display]
+   :first-window first-window
+   :last-window last-window})
 
 (defn get-spaces []
   (let [res (-> (yabai :query "--spaces")
@@ -98,42 +98,42 @@
 
 
 (defn- window->entity [window]
-  #:wmbb.window{:id (:id window)
-                :title (:title window)
-                :pid (:pid window)
-                :app (:app window)
-                :role (:role window)
-                :subrole (:subrole window)
-                :x (-> window :frame :x)
-                :y (-> window :frame :y)
-                :w (-> window :frame :w)
-                :h (-> window :frame :h)
-                :is-minimized (:is-minimized window)
-                :is-native-fullscreen (:is-native-fullscreen window)
-                :is-sticky (:is-sticky window)
-                :is-floating (:is-floating window)
-                :is-grabbed (:is-grabbed window)
-                :is-hidden (:is-hidden window)
-                :is-visible (:is-visible window)
-                :has-focus (:has-focus window)
-                :has-fullscreen-zoom (:has-fullscreen-zoom window)
-                :has-ax-reference (:has-ax-reference window)
-                :has-shadow (:has-shadow window)
-                :has-parent-zoom (:has-parent-zoom window)
-                :can-move (:can-move window)
-                :can-resize (:can-resize window)
-                :stack-index (:stack-index window)
-                :level (:level window)
-                :sub-level (:sub-level window)
-                :layer (:layer window)
-                :sub-layer (:sub-layer window)
-                :split-type (:split-type window)
-                :opacity (:opacity window)
-                :display [:wmbb.display/index (:display window)]
-                :space [:wmbb.space/index (:space window)]
-                :root-window (:root-window window)
-                :split-child (:split-child window)
-                :scratchpad (:scratchpad window)})
+  {:id (:id window)
+   :title (:title window)
+   :pid (:pid window)
+   :app (:app window)
+   :role (:role window)
+   :subrole (:subrole window)
+   :x (-> window :frame :x)
+   :y (-> window :frame :y)
+   :w (-> window :frame :w)
+   :h (-> window :frame :h)
+   :is-minimized (:is-minimized window)
+   :is-native-fullscreen (:is-native-fullscreen window)
+   :is-sticky (:is-sticky window)
+   :is-floating (:is-floating window)
+   :is-grabbed (:is-grabbed window)
+   :is-hidden (:is-hidden window)
+   :is-visible (:is-visible window)
+   :has-focus (:has-focus window)
+   :has-fullscreen-zoom (:has-fullscreen-zoom window)
+   :has-ax-reference (:has-ax-reference window)
+   :has-shadow (:has-shadow window)
+   :has-parent-zoom (:has-parent-zoom window)
+   :can-move (:can-move window)
+   :can-resize (:can-resize window)
+   :stack-index (:stack-index window)
+   :level (:level window)
+   :sub-level (:sub-level window)
+   :layer (:layer window)
+   :sub-layer (:sub-layer window)
+   :split-type (:split-type window)
+   :opacity (:opacity window)
+   :display (:display window) ;[:wmbb.display/index (:display window)]
+   :space (:space window) ;[:wmbb.space/index (:space window)]
+   :root-window (:root-window window)
+   :split-child (:split-child window)
+   :scratchpad (:scratchpad window)})
 
 (defn get-windows []
   (let [res (-> (yabai :query "--windows")

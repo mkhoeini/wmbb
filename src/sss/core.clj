@@ -5,7 +5,8 @@
    [sss.signal :as sig]
    [sss.sys-ref :refer [*system*]]
    [sss.system :as sys]
-   [sss.event :as ev]))
+   [sss.event :as ev]
+   [sss.entity :as ent]))
 
 
 
@@ -25,13 +26,16 @@
     set of archetype maps ({:name :kw :tags [:kw] :schema {}}) for entities
     all archetypes will get the :sss.tag/entity tag by default
   entities:
-    initial value for entities. a map from archetype name to a set of entity instances
+    initial value for entities. set of entity maps {:sss.entity/archetype :kw
+                                                    :sss.entity.[name]/* any?
+                                                    :sss.entity.[name].state/* any?
+                                                    :sss.entity.[name].desired/* any?}
   behaviors:
     map from behavior name to a map of {:events [:kw] :tags [:kw] :reaction (fn [event] tx)}
   commands:
-    map of command name to a map of {:fn (fn [cmd])}
+    map of command name to a map of {:retry (fn [cmd] (seq int)) :exec (fn [cmd] bool)}
   reconcilers:
-    map from reconciler name to a map of {:entity :ent-name :fn (fn [old-ent new-ent] [{:command}])}
+    map from reconciler name to a map of {:archetype :kw :dirty? (fn [entity] bool) :to-cmds (fn [old-ent new-ent] [{:command :data}])}
   "
   [& {:as config}]
   (sys/create-system config))
@@ -61,8 +65,18 @@
   (apply db/find1 (::db/conn *system*) where))
 
 
-(defn make-archetype [name tags fields]
-  (arch/make-archetype name tags fields))
+(defn make-archetype
+  ([name tags id-fields state-fields]
+   (arch/make-archetype name tags id-fields state-fields {}))
+  ([name tags id-fields state-fields desired-fields]
+   (arch/make-archetype name tags id-fields state-fields desired-fields)))
+
+
+(defn make-init-entity
+  ([archetype id-map state]
+   (ent/make-init-entity archetype id-map state {}))
+  ([archetype id-map state desired]
+   (ent/make-init-entity archetype id-map state desired)))
 
 
 (defn make-event [name target data]

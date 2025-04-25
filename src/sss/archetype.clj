@@ -15,10 +15,16 @@
                :* [:db/cardinality :db.cardinality/many]))))
 
 
-(defn make-archetype [name tags fields]
-  (let [schema (into {} (for [[attr-name attr-val] fields]
-                          [attr-name (attrs attr-val)]))]
-    {:name name
+(defn make-archetype [archetype tags id-fields state-fields desired-fields]
+  (let [a-name (name archetype)
+        id-ns (str "sss.entity." a-name)
+        ids (for [[k v] id-fields] [(keyword id-ns (name k)) (attrs v)])
+        state-ns (str id-ns ".state")
+        states (for [[k v] state-fields] [(keyword state-ns (name k)) (attrs v)])
+        desired-ns (str id-ns ".desired")
+        desireds (for [[k v] desired-fields] [(keyword desired-ns (name k)) (attrs v)])
+        schema (into {} (concat ids states desireds))]
+    {:name archetype
      :tags (into [::tag/entity] tags)
      :schema schema}))
 
