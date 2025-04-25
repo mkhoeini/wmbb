@@ -40,3 +40,7 @@
   {:name name
    :target target
    :data data})
+
+
+(defn send-event! [events ev]
+  (async/put! (get-event-chan events) ev))

@@ -45,6 +45,7 @@
    ::ent/init {:archetypes (ig/ref ::arch/archetypes)
                :cfg (ig/ref ::cfg/config)
                :db-conn (ig/ref ::db/conn)
+               :events (ig/ref ::ev/events)
                :ev-loop (ig/ref ::ent/event-consumer)}})
 
 

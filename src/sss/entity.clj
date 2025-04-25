@@ -21,17 +21,20 @@
     (into {::archetype [:sss.archetype/name archetype]} (concat ids states desireds))))
 
 
-(defmethod ig/init-key ::init [_ {:keys [db-conn] _dummy :archetypes _dummy2 :ev-loop {:keys [entities]} :cfg}]
+(defmethod ig/init-key ::init [_ {:keys [db-conn events] _dummy :archetypes _dummy2 :ev-loop {:keys [entities]} :cfg}]
   (let [entities (map-indexed (fn [idx ent]
                                 (if (some? (:db/id ent))
                                   ent
                                   (assoc ent :db/id (str "$$ent-" idx))))
                               entities)
-        tx-res (apply db/transact! db-conn entities)]
-    (->> entities
-         (map :db/id)
-         (map #(get-in tx-res [:tempids %]))
-         (mapv #(d/entity @db-conn %)))))
+        tx-res (apply db/transact! db-conn entities)
+        res (->> entities
+                 (map :db/id)
+                 (map #(get-in tx-res [:tempids %]))
+                 (mapv #(d/entity @db-conn %)))]
+    (doseq [e res]
+      (ev/send-event! events (ev/make-event ::ev/entity-created e {})))
+    res))
 
 
 (defn- get-events-of-behavior [behavior]
