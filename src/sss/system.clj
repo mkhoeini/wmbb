@@ -4,6 +4,7 @@
    [integrant.core :as ig]
    [sss.archetype :as arch]
    [sss.behavior :as be]
+   [sss.command :as cmd]
    [sss.config :as cfg]
    [sss.db :as db]
    [sss.entity :as ent]
@@ -46,7 +47,9 @@
                :cfg (ig/ref ::cfg/config)
                :db-conn (ig/ref ::db/conn)
                :events (ig/ref ::ev/events)
-               :ev-loop (ig/ref ::ent/event-consumer)}})
+               :ev-loop (ig/ref ::ent/event-consumer)}
+   ::cmd/commands {:cfg (ig/ref ::cfg/config)
+                   :db-conn (ig/ref ::db/conn)}})
 
 
 (defn get-final-config [config]

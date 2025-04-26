@@ -7,7 +7,8 @@
    [wmbb.event :as ev]
    [wmbb.subscriptions :as subs]
    [wmbb.tags :as tag]
-   [wmbb.yabai :as yabai]))
+   [wmbb.yabai :as yabai]
+   [wmbb.commands :as cmd]))
 
 
 
@@ -20,7 +21,7 @@
             :archetypes entity/archetypes
             :entities (entity/get-initial-entity-values)
             :behaviors be/behaviors
-            :commands {}
+            :commands cmd/commands
             :reconcilers {}}))
 
 (comment
