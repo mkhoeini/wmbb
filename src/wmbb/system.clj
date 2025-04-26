@@ -3,12 +3,13 @@
    [mount.core :as mount :refer [defstate]]
    [sss.core :as sss]
    [wmbb.behaviors :as be]
+   [wmbb.commands :as cmd]
    [wmbb.entity :as entity]
    [wmbb.event :as ev]
+   [wmbb.reconcilers :as rec]
    [wmbb.subscriptions :as subs]
    [wmbb.tags :as tag]
-   [wmbb.yabai :as yabai]
-   [wmbb.commands :as cmd]))
+   [wmbb.yabai :as yabai]))
 
 
 
@@ -22,7 +23,7 @@
             :entities (entity/get-initial-entity-values)
             :behaviors be/behaviors
             :commands cmd/commands
-            :reconcilers {}}))
+            :reconcilers rec/reconcilers}))
 
 (comment
   (sss/create-system system-def)

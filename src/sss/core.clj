@@ -35,7 +35,9 @@
   commands:
     map of command name to a map of {:retry (fn [cmd] (seq int)) :exec (fn [cmd] bool)}
   reconcilers:
-    map from reconciler name to a map of {:archetype :kw :dirty? (fn [entity] bool) :to-cmds (fn [old-ent new-ent] [{:command :data}])}
+    map from reconciler name to a map of {:archetype :kw
+                                          :dirty? (fn [old-ent new-ent] bool)
+                                          :to-cmds (fn [old-ent new-ent] [{:command :data}])}
   "
   [& {:as config}]
   (sys/create-system config))

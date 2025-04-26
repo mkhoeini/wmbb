@@ -9,6 +9,7 @@
    [sss.db :as db]
    [sss.entity :as ent]
    [sss.event :as ev]
+   [sss.reconciler :as rec]
    [sss.signal :as sig]
    [sss.subscription :as sub]
    [sss.tag :as tag]
@@ -49,7 +50,9 @@
                :events (ig/ref ::ev/events)
                :ev-loop (ig/ref ::ent/event-consumer)}
    ::cmd/commands {:cfg (ig/ref ::cfg/config)
-                   :db-conn (ig/ref ::db/conn)}})
+                   :db-conn (ig/ref ::db/conn)}
+   ::rec/reconcilers {:cfg (ig/ref ::cfg/config)
+                      :db-conn (ig/ref ::db/conn)}})
 
 
 (defn get-final-config [config]
